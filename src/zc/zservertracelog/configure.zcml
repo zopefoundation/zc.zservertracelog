@@ -2,14 +2,15 @@
 
   <utility
       name="WSGI-HTTP"
-      component=".http"
+      component=".tracelog.http"
       provides="zope.app.server.servertype.IServerType"
       />
 
   <utility
       name="WSGI-PostmortemDebuggingHTTP"
-      component=".pmhttp"
+      component=".tracelog.pmhttp"
       provides="zope.app.server.servertype.IServerType"
       />
 
+  <subscriber handler=".tracelog.started" />
 </configure>
