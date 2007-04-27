@@ -1,0 +1,15 @@
+<configure xmlns="http://namespaces.zope.org/zope">
+
+  <utility
+      name="WSGI-HTTP"
+      component=".http"
+      provides="zope.app.server.servertype.IServerType"
+      />
+
+  <utility
+      name="WSGI-PostmortemDebuggingHTTP"
+      component=".pmhttp"
+      provides="zope.app.server.servertype.IServerType"
+      />
+
+</configure>
