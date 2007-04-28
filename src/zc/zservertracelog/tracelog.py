@@ -50,6 +50,8 @@ class Channel(zope.server.http.httpserverchannel.HTTPServerChannel):
         zope.server.http.httpserverchannel.HTTPServerChannel.handle_request(
             self, parser)
 
+
+status_match = re.compile('(\d+) (.*)').match
 class Server(wsgihttpserver.WSGIHTTPServer):
 
     channel_class = Channel
@@ -62,7 +64,7 @@ class Server(wsgihttpserver.WSGIHTTPServer):
 
         def start_response(status, headers):
             # Prepare the headers for output
-            status, reason = re.match('([0-9]*) (.*)', status).groups()
+            status, reason = status_match(status).groups()
             task.setResponseStatus(status, reason)
             task.appendResponseHeaders(['%s: %s' % i for i in headers])
 
@@ -70,18 +72,29 @@ class Server(wsgihttpserver.WSGIHTTPServer):
             return wsgihttpserver.fakeWrite
 
         # Call the application to handle the request and write a response
-        response = self.application(env, start_response)
-        length = [h.split(': ')[1].strip()
-                  for h in task.accumulated_headers
-                  if h.lower().startswith('content-length: ')]
-        if length:
-            length = length[0]
+        try:
+            response = self.application(env, start_response)
+        except Exception, v:
+            logger.info("A %s %s Error: %s", id(self), now(), v)
+            logger.info("E %s %s", id(self), now())
+            raise
         else:
-            length = '?'
-        logger.info("A %s %s %s %s", id(self), now(),
-                    task.status, length)
-        task.write(response)
-        logger.info("E %s %s", id(self), now())
+            length = [h.split(': ')[1].strip()
+                      for h in getattr(task, 'accumulated_headers', ())
+                      if h.lower().startswith('content-length: ')]
+            if length:
+                length = length[0]
+            else:
+                length = '?'
+            logger.info("A %s %s %s %s", id(self), now(),
+                        getattr(task, 'status', '?'), length)
+            try:
+                task.write(response)
+            except Exception, v:
+                logger.info("E %s %s Error: %s", id(self), now(), v)
+                raise
+            else:
+                logger.info("E %s %s", id(self), now())
 
 http = servertype.ServerType(
     Server,
