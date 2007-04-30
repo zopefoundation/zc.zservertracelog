@@ -75,8 +75,8 @@ class Server(wsgihttpserver.WSGIHTTPServer):
         try:
             response = self.application(env, start_response)
         except Exception, v:
-            logger.info("A %s %s Error: %s", id(self), now(), v)
-            logger.info("E %s %s", id(self), now())
+            logger.info("A %s %s Error: %s", id(task.channel), now(), v)
+            logger.info("E %s %s", id(task.channel), now())
             raise
         else:
             length = [h.split(': ')[1].strip()
@@ -86,15 +86,15 @@ class Server(wsgihttpserver.WSGIHTTPServer):
                 length = length[0]
             else:
                 length = '?'
-            logger.info("A %s %s %s %s", id(self), now(),
+            logger.info("A %s %s %s %s", id(task.channel), now(),
                         getattr(task, 'status', '?'), length)
             try:
                 task.write(response)
             except Exception, v:
-                logger.info("E %s %s Error: %s", id(self), now(), v)
+                logger.info("E %s %s Error: %s", id(task.channel), now(), v)
                 raise
             else:
-                logger.info("E %s %s", id(self), now())
+                logger.info("E %s %s", id(task.channel), now())
 
 http = servertype.ServerType(
     Server,
