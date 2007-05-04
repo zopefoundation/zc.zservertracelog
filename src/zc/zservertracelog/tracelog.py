@@ -31,7 +31,7 @@ import zope.app.appsetup.interfaces
 logger = logging.getLogger('zc.tracelog')
 
 def now():
-    return datetime.datetime.utcnow().replace(microsecond=0).isoformat()
+    return datetime.datetime.now().replace(microsecond=0).isoformat()
 
 class Parser(zope.server.http.httprequestparser.HTTPRequestParser):
 
