@@ -154,7 +154,13 @@ def main(args=None):
     restart = restarts.pop(0)
     minutes_header()
     remove_prefix = options.remove_prefix
-    for record in open(file):
+
+    if file == '-':
+        file = sys.stdin
+    else:
+        file = open(file)
+        
+    for record in file:
         record = record.split()
         typ, rid, dt = record[:3]
         min = dt[:-3]
