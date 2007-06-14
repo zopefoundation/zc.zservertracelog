@@ -8,7 +8,7 @@ tracereport = zc.zservertracelog.tracereport:main
 name = 'zc.zservertracelog'
 setup(
     name = name,
-    version = '0.1',
+    version = '0.2',
     author = 'Jim Fulton',
     author_email = 'jim@zope.com',
     description = 'Zope 3 tracelog implementation for zserver',
@@ -19,6 +19,7 @@ setup(
     namespace_packages = ['zc'],
     package_dir = {'': 'src'},
     install_requires = 'setuptools',
+    include_package_data = True,
     zip_safe = False,
     entry_points=entry_points,
     )
