@@ -55,7 +55,7 @@ status_match = re.compile('(\d+) (.*)').match
 class Server(wsgihttpserver.WSGIHTTPServer):
 
     channel_class = Channel
-    
+
     def executeRequest(self, task):
         """Overrides HTTPServer.executeRequest()."""
         logger.info("C %s %s", id(task.channel), now())

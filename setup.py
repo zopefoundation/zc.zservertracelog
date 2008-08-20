@@ -27,7 +27,7 @@ setup(
     description = 'Zope 3 tracelog implementation for zserver',
     license = 'ZPL 2.1',
     keywords = 'zope3',
-    
+
     packages = find_packages('src'),
     namespace_packages = ['zc'],
     package_dir = {'': 'src'},

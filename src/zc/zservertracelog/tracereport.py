@@ -13,8 +13,6 @@
 ##############################################################################
 """Yet another lag analysis tool
 
-
-
 $Id$
 """
 
@@ -78,7 +76,7 @@ class Times:
             self.median = self.mean = self.impact = 0
             return 0
         self.times.sort()
-        n = len(times) 
+        n = len(times)
         if n % 2:
             m = times[(n+1)/2-1]
         else:
@@ -93,7 +91,7 @@ class Times:
         if not times:
             return "              0                             %5d" % (
                 self.hangs)
-            
+
         n = len(times)
         m = self.median
         return "%9.1f %5d %6.0f %6.2f %6.2f %6.0f %5d" % (
@@ -113,9 +111,9 @@ class Times:
 def parsedt(s):
     date, time = s.split('T')
     return datetime.datetime(*(
-        map(int, date.split('-')) 
+        map(int, date.split('-'))
         +
-        map(int, time.split(':'))         
+        map(int, time.split(':'))
         ))
 
 def main(args=None):
@@ -143,8 +141,8 @@ def main(args=None):
         output_stats = output_stats_text
         minutes_header = minutes_header_text
         minutes_footer = minutes_footer_text
-        
-        
+
+
     urls = {}
     [file] = args
     lmin = ldt = None
@@ -159,7 +157,7 @@ def main(args=None):
         file = sys.stdin
     else:
         file = open(file)
-        
+
     for record in file:
         record = record.split()
         typ, rid, dt = record[:3]
@@ -179,7 +177,7 @@ def main(args=None):
             spr = spa = 0.0
             restart = restarts.pop(0)
         ldt = dt
-        
+
         if min != lmin:
             if lmin is not None:
                 output_minute(lmin, requests, input, wait, apps, output, n, spr, spa)
@@ -193,7 +191,7 @@ def main(args=None):
             spr = 0.0
             spa = 0.0
             n = 0
-            
+
         if typ == 'B':
             if rid in requests:
                 request = requests[rid]
@@ -203,7 +201,7 @@ def main(args=None):
                     apps -= 1
                 else:
                     input -= 1
-            
+
             input += 1
             request = Request(dt, *record[3:5])
             if remove_prefix and request.url.startswith(remove_prefix):
@@ -365,7 +363,7 @@ def print_app_requests_text(requests, dt, min_seconds, max_requests, urls,
     urls = {}
     for s, request in requests:
         urls[request.url] = urls.get(request.url, 0) + 1
-    
+
     requests.sort()
     requests.reverse()
     for s, request in requests[:max_requests]:
@@ -392,7 +390,7 @@ def print_app_requests_html(requests, dt, min_seconds, max_requests, allurls,
     urls = {}
     for s, request in requests:
         urls[request.url] = urls.get(request.url, 0) + 1
-    
+
     requests.sort()
     requests.reverse()
     printed = False
@@ -476,8 +474,8 @@ parser.add_option("--remove-prefix", dest='remove_prefix',
                   help="""
 A prefex to be removed from URLS.
 """)
-                  
 
-            
+
+
 if __name__ == '__main__':
     main()
