@@ -1,0 +1,11 @@
+
+=========
+ Changes
+=========
+
+
+0.4 (unreleased)
+================
+
+* added automated tests.
+

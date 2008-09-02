@@ -13,20 +13,18 @@
 ##############################################################################
 """Crude Tracelog Hack for ZServer
 """
-import datetime, re, logging
-
-import zope.component
-
-from zope.server.http.commonaccesslogger import CommonAccessLogger
-from zope.server.http import wsgihttpserver
-import zope.server.http.httprequestparser
-
-import zope.server.http.httpserverchannel
 from zope.app.server import servertype
-
 from zope.app.wsgi import WSGIPublisherApplication
-
+from zope.server.http import wsgihttpserver
+from zope.server.http.commonaccesslogger import CommonAccessLogger
+import datetime
+import logging
+import re
 import zope.app.appsetup.interfaces
+import zope.component
+import zope.server.http.httprequestparser
+import zope.server.http.httpserverchannel
+
 
 logger = logging.getLogger('zc.tracelog')
 
@@ -79,8 +77,9 @@ class Server(wsgihttpserver.WSGIHTTPServer):
             logger.info("E %s %s", id(task.channel), now())
             raise
         else:
+            accumulated_headers = getattr(task, 'accumulated_headers') or ()
             length = [h.split(': ')[1].strip()
-                      for h in getattr(task, 'accumulated_headers', ())
+                      for h in accumulated_headers
                       if h.lower().startswith('content-length: ')]
             if length:
                 length = length[0]

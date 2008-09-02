@@ -27,11 +27,20 @@ setup(
     description = 'Zope 3 tracelog implementation for zserver',
     license = 'ZPL 2.1',
     keywords = 'zope3',
-
     packages = find_packages('src'),
     namespace_packages = ['zc'],
     package_dir = {'': 'src'},
-    install_requires = 'setuptools',
+    install_requires = [
+            'setuptools',
+            'zope.app.appsetup',
+            'zope.app.server',
+            'zope.app.wsgi',
+            'zope.server',
+            ],
+    extras_require = dict(
+        test = [
+            'zope.testing',
+            ]),
     include_package_data = True,
     zip_safe = False,
     entry_points=entry_points,

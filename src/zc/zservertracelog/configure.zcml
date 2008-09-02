@@ -13,4 +13,5 @@
       />
 
   <subscriber handler=".tracelog.started" />
+
 </configure>
