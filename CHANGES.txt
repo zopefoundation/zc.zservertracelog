@@ -9,3 +9,4 @@
 
 * added automated tests.
 
+* added hooks for tracelog extensions.
