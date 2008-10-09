@@ -9,4 +9,9 @@
 
 * added automated tests.
 
-* added hooks for tracelog extensions.
+* fixed bug where log entries could be split by messages containing newline
+  characters.
+
+* added request query strings to log.
+
+* added the tracelog to the WSGI environment.

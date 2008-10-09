@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <configure xmlns="http://namespaces.zope.org/zope">
 
   <utility
@@ -11,6 +12,8 @@
       component=".tracelog.pmhttp"
       provides="zope.app.server.servertype.IServerType"
       />
+
+  <adapter factory="zc.zservertracelog.tracelog.get" />
 
   <subscriber handler=".tracelog.started" />
 
