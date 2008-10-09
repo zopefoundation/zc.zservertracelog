@@ -1,17 +1,15 @@
-
 =========
  Changes
 =========
 
+0.4 (2008-10-09)
+----------------
 
-0.4 (unreleased)
-================
+- added automated tests.
 
-* added automated tests.
-
-* fixed bug where log entries could be split by messages containing newline
+- fixed bug where log entries could be split by messages containing newline
   characters.
 
-* added request query strings to log.
+- added request query strings to log.
 
-* added the tracelog to the WSGI environment.
+- added the tracelog to the WSGI environment.
