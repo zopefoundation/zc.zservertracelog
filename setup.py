@@ -21,7 +21,7 @@ tracereport = zc.zservertracelog.tracereport:main
 name = 'zc.zservertracelog'
 setup(
     name = name,
-    version = '0.4',
+    version = '0.5',
     author = 'Jim Fulton',
     author_email = 'jim@zope.com',
     description = 'Zope 3 tracelog implementation for zserver',
