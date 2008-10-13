@@ -11,37 +11,54 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
+import os
 from setuptools import setup, find_packages
+
+name = 'zc.zservertracelog'
 
 entry_points = """
 [console_scripts]
 tracereport = zc.zservertracelog.tracereport:main
 """
 
-name = 'zc.zservertracelog'
+def read(*rnames):
+    return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
+
+
 setup(
-    name = name,
-    version = '0.5',
-    author = 'Jim Fulton',
-    author_email = 'jim@zope.com',
-    description = 'Zope 3 tracelog implementation for zserver',
-    license = 'ZPL 2.1',
-    keywords = 'zope3',
-    packages = find_packages('src'),
-    namespace_packages = ['zc'],
-    package_dir = {'': 'src'},
-    install_requires = [
+    name=name,
+    version='0.5',
+    url='http://pypi.python.org/pypi/' + name,
+    author='Zope Corporation and Contributors',
+    author_email='zope3-dev@zope.org',
+    description='Zope 3 tracelog implementation for zserver',
+    long_description=(
+        read('README.txt')
+        + '\n\n'
+        + 'Detailed Documentation\n'
+        + '**********************\n'
+        + '\n\n'
+        + read('src', 'zc', 'zservertracelog', 'README.txt')
+        + '\n\n'
+        + read('CHANGES.txt')
+    ),
+    license='ZPL 2.1',
+    keywords='zope3',
+    packages=find_packages('src'),
+    namespace_packages=['zc'],
+    package_dir={'': 'src'},
+    install_requires=[
             'setuptools',
             'zope.app.appsetup',
             'zope.app.server',
             'zope.app.wsgi',
             'zope.server',
             ],
-    extras_require = dict(
-        test = [
+    extras_require=dict(
+        test=[
             'zope.testing',
             ]),
-    include_package_data = True,
-    zip_safe = False,
+    include_package_data=True,
+    zip_safe=False,
     entry_points=entry_points,
     )
