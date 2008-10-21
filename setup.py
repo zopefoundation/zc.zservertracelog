@@ -27,7 +27,7 @@ def read(*rnames):
 
 setup(
     name=name,
-    version='0.5',
+    version='1.0.0',
     url='http://pypi.python.org/pypi/' + name,
     author='Zope Corporation and Contributors',
     author_email='zope3-dev@zope.org',
