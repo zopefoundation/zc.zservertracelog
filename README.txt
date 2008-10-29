@@ -41,7 +41,7 @@ To create a trace log, include the zc.zservertracelog package in your
 site ZCML configuration.  Also, define a logger section in zope.conf::
 
   <logger>
-    name zc.tracelog
+    name zc.zservertracelog
     propagate false
 
     <logfile>
