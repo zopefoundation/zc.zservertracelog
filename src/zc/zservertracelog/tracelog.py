@@ -32,7 +32,7 @@ def _format_datetime(dt):
     return dt.replace(microsecond=0).isoformat()
 
 
-def _log(channel_id, trace_code='X', msg=None, timestamp=None):
+def _log(channel_id, trace_code='-', msg=None, timestamp=None):
     if timestamp is None:
         timestamp = datetime.datetime.now()
 
@@ -57,7 +57,7 @@ class TraceLog(object):
         self.channel_id = channel_id
 
     def log(self, msg=None):
-        _log(self.channel_id, 'X', msg)
+        _log(self.channel_id, '-', msg)
 
 
 class Parser(zope.server.http.httprequestparser.HTTPRequestParser):
