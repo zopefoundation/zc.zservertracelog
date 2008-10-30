@@ -1,6 +1,7 @@
+#!/usr/local/bin/python2.4
 ##############################################################################
 #
-# Copyright (c) 2006, 2008 Zope Corporation and Contributors.
+# Copyright (c) Zope Corporation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -11,9 +12,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Yet another lag analysis tool
-
-$Id$
+"""Yet another trace log analysis tool
 """
 
 import datetime, optparse, sys
@@ -82,7 +81,7 @@ class Times:
         else:
             m = .5 * (times[n/2]+times[n/2-1])
         self.median = m
-        self.mean = sum(times)/n
+        self.mean = float(sum(times))/n
         self.impact = self.mean * (n+self.hangs)
         return self.impact
 
@@ -107,6 +106,12 @@ class Times:
             impact = '<a name="u%s">%s' % (self.tid, self.impact)
             print td(impact, n, times[0], m, self.mean, times[-1],
                      self.hangs)
+
+    def __add__(self, other):
+        result = Times()
+        result.times = self.times + other.times
+        result.hangs = self.hangs + other.hangs
+        return result
 
 def parsedt(s):
     date, time = s.split('T')
@@ -141,6 +146,10 @@ def main(args=None):
         output_stats = output_stats_text
         minutes_header = minutes_header_text
         minutes_footer = minutes_footer_text
+
+    if options.summary_only:
+        print_app_requests = output_minute = lambda *a, **kw: None
+        minutes_footer = minutes_header = lambda *a, **kw: None
 
 
     urls = {}
@@ -180,7 +189,8 @@ def main(args=None):
 
         if min != lmin:
             if lmin is not None:
-                output_minute(lmin, requests, input, wait, apps, output, n, spr, spa)
+                output_minute(lmin, requests, input, wait, apps, output,
+                              n, spr, spa)
                 if apps > options.apps:
                     print_app_requests(requests, dt,
                                        options.old_requests,
@@ -207,9 +217,6 @@ def main(args=None):
             if remove_prefix and request.url.startswith(remove_prefix):
                 request.url = request.url[len(remove_prefix):]
             requests[rid] = request
-            times = urls.get(request.url)
-            if times is None:
-                times = urls[request.url] = Times()
         elif typ == 'I':
             if rid in requests:
                 input -= 1
@@ -233,8 +240,12 @@ def main(args=None):
                 spr += request.total_seconds
                 spa += request.app_seconds
                 n += 1
-                times = urls[request.url]
+                url = "%s -> %s" % (request.url, request.response)
+                times = urls.get(url)
+                if times is None:
+                    times = urls[url] = Times()
                 times.finished(request)
+
         elif typ in 'SX':
             print_app_requests(requests, ldt,
                                options.old_requests,
@@ -256,12 +267,12 @@ def main(args=None):
 
     minutes_footer()
 
-    output_stats(urls)
+    output_stats(urls, lines=options.summary_lines)
 
     if options.html:
         print '</body></html>'
 
-def output_stats_text(urls):
+def output_stats_text(urls, lines):
     print
     print 'URL statistics:'
     print "   Impact count    min median   mean    max hangs"
@@ -271,11 +282,15 @@ def output_stats_text(urls):
             ]
     urls.sort()
     urls.reverse()
+    line = 0
     for (_, url, times) in urls:
         if times.impact > 0 or times.hangs:
             print times, url
+            line += 1
+            if line > lines:
+                break
 
-def output_stats_html(urls):
+def output_stats_html(urls, lines):
     print
     print 'URL statistics:'
     print '<table border="1">'
@@ -286,12 +301,19 @@ def output_stats_html(urls):
             ]
     urls.sort()
     urls.reverse()
+    line = 0
     for (_, url, times) in urls:
         if times.impact > 0 or times.hangs:
-            print '<tr>'
+            if line%2:
+                print '<tr style="background: lightgrey;">'
+            else:
+                print '<tr>'
             times.html()
             print td(url)
             print '</tr>'
+            line += 1
+            if line > lines:
+                break
     print '</table>'
 
 def minutes_header_text():
@@ -330,8 +352,14 @@ def output_minute_text(lmin, requests, input, wait, apps, output, n, spr, spa):
 def td(*values):
     return ''.join([("<td>%s</td>" % s) for s in values])
 
+output_minute_count = 0
 def output_minute_html(lmin, requests, input, wait, apps, output, n, spr, spa):
-    print '<tr>'
+    global output_minute_count
+    output_minute_count += 1
+    if output_minute_count%2:
+        print '<tr style="background: lightgrey">'
+    else:
+        print '<tr>'
     apps = '<font size="+2"><strong>%s</strong></font>' % apps
     print td(lmin.replace('T', ' '), len(requests), input, wait, apps, output)
     if n:
@@ -474,6 +502,13 @@ parser.add_option("--remove-prefix", dest='remove_prefix',
                   help="""
 A prefex to be removed from URLS.
 """)
+parser.add_option("--summary-only", dest='summary_only', action='store_true',
+                  help="""
+Only output summary lines.
+""")
+parser.add_option("--summary-lines", dest='summary_lines',
+                  type="int", default=999999999,
+                  help="""The number of summary lines to show""")
 
 
 
