@@ -2,8 +2,8 @@
  Changes
 =========
 
-(unreleased)
-------------
+1.1.0 (2008-10-31)
+------------------
 
 - fixed tracelog extension format so that it doesn't conflict with the Zope2
   trace code for server shutdown.
