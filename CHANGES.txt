@@ -2,6 +2,17 @@
  Changes
 =========
 
+(unreleased)
+------------
+
+- fixed tracelog extension format so that it doesn't conflict with the Zope2
+  trace code for server shutdown.
+
+- added *summary-only* and *summary-lines* options to tracereport.
+
+- added shading of alternating rows in tracereport table output.
+
+
 0.4 (2008-10-09)
 ----------------
 
