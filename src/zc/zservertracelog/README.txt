@@ -192,6 +192,6 @@ Here is an example application that adds a custom entry to the tracelog.
     B 21569456 2008-09-12T15:51:05 GET /test-req1
     I 21569456 2008-09-12T15:51:05 0
     C 21569456 2008-09-12T15:51:05
-    X 21569456 2008-09-12T15:51:05 beep! beep!
+    - 21569456 2008-09-12T15:51:05 beep! beep!
     A 21569456 2008-09-12T15:51:05 200 ?
     E 21569456 2008-09-12T15:51:05
