@@ -12,6 +12,8 @@
 
 - added shading of alternating rows in tracereport table output.
 
+- fixed a documentation error for loghandler configuration.
+
 
 0.4 (2008-10-09)
 ----------------
