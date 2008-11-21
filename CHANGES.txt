@@ -2,6 +2,12 @@
  Changes
 =========
 
+1.1.1 (2008-11-21)
+------------------
+
+- switch back to logger name zc.tracelog to maintain backward compatibility.
+
+
 1.1.0 (2008-10-31)
 ------------------
 

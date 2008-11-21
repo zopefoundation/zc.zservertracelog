@@ -15,7 +15,10 @@ For these examples, we'll add a log handler that outputs to standard out.
     >>> import sys
     >>> stdout_handler = logging.StreamHandler(sys.stdout)
 
-    >>> logger = logging.getLogger('zc.zservertracelog')
+The logger's name is not the package name, but "zc.tracelog" for backward
+compatability.
+
+    >>> logger = logging.getLogger('zc.tracelog')
     >>> logger.setLevel(logging.INFO)
     >>> logger.addHandler(stdout_handler)
 

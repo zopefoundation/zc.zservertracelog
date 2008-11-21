@@ -26,7 +26,7 @@ import zope.component
 import zope.server.http.httprequestparser
 import zope.server.http.httpserverchannel
 
-tracelog = logging.getLogger('zc.zservertracelog')
+tracelog = logging.getLogger('zc.tracelog')
 
 def _format_datetime(dt):
     return dt.replace(microsecond=0).isoformat()
