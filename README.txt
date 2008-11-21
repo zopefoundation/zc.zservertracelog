@@ -1,6 +1,6 @@
-***********************
+=======================
 Zope 3/ZServer tracelog
-***********************
+=======================
 
 This package implements a Zope2-style (extended) tracelog.  A tracelog
 is a kind of access log that records several low-level events for each
@@ -8,8 +8,8 @@ request.  Each log entry starts with a record type, a request
 identifier and the time.  Some log records have additional data.
 
 
- Trace Codes
-=============
+Trace Codes
+===========
 
 - Request begins:
 
@@ -59,7 +59,7 @@ site ZCML configuration.  Also, define a logger section in zope.conf::
 
   </logger>
 
-where, of course, you'll need to specify a log file path.
+Where, of course, you'll need to specify a log file path.
 
 The analysis script, tracereport, can be used to analyze the trace
 log. I recommend the html output option.

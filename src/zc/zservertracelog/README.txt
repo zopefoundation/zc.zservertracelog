@@ -1,6 +1,6 @@
-==================
- ZServer TraceLog
-==================
+================
+ZServer TraceLog
+================
 
 A tracelog is a kind of access log that records several low-level events for
 each request.  Each log entry starts with a record type, a request identifier
