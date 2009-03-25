@@ -114,7 +114,7 @@ class Times:
         return result
 
 def parsedt(s):
-    date, time = s.split('T')
+    date, time = s.split(' ')
     h_m_s, ms = time.split('.')
     return datetime.datetime(*(
         map(int, date.split('-'))
@@ -172,9 +172,8 @@ def main(args=None):
 
     for record in file:
         record = record.split()
-        typ, rid, dt = record[:3]
-        min = dt[:-3]
-        dt = parsedt(dt)
+        typ, rid, dt, min = record[:4]
+        dt = parsedt(' '.join([dt,min]))
         if dt == restart:
             continue
         while dt > restart:
@@ -345,7 +344,7 @@ def minutes_footer_html():
     print '</table>'
 
 def output_minute_text(lmin, requests, input, wait, apps, output, n, spr, spa):
-    print lmin.replace('T', ' '), "%5d I=%3d W=%3d A=%3d O=%5d " % (
+    print lmin.replace('T', ' '), " %5d I=%3d W=%3d A=%3d O=%5d " % (
         len(requests), input, wait, apps, output),
     if n:
         print "N=%4d %10.2f %10.2f" % (n, spr/n, spa/n)
