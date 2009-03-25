@@ -115,10 +115,13 @@ class Times:
 
 def parsedt(s):
     date, time = s.split('T')
+    h_m_s, ms = time.split('.')
     return datetime.datetime(*(
         map(int, date.split('-'))
         +
-        map(int, time.split(':'))
+        map(int, h_m_s.split(':'))
+        +
+        [int(ms)]
         ))
 
 def main(args=None):
