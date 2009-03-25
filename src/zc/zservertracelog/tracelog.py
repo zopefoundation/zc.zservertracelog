@@ -28,15 +28,12 @@ import zope.server.http.httpserverchannel
 
 tracelog = logging.getLogger('zc.tracelog')
 
-def _format_datetime(dt):
-    return dt.replace(microsecond=0).isoformat()
-
 
 def _log(channel_id, trace_code='-', msg=None, timestamp=None):
     if timestamp is None:
         timestamp = datetime.datetime.now()
 
-    entry = '%s %s %s' % (trace_code, channel_id, _format_datetime(timestamp))
+    entry = '%s %s %s' % (trace_code, channel_id, timestamp)
 
     if msg:
         entry += ' %s' % repr(msg)[1:-1]
@@ -154,4 +151,4 @@ pmhttp = servertype.ServerType(
 
 @zope.component.adapter(zope.app.appsetup.interfaces.IProcessStartingEvent)
 def started(event):
-    tracelog.info('S 0 %s', _format_datetime(datetime.datetime.now()))
+    tracelog.info('S 0 %s', datetime.datetime.now())

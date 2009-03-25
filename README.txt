@@ -13,37 +13,37 @@ Trace Codes
 
 - Request begins:
 
-  B -1214390740 2007-04-27T20:16:55 GET /
+  B -1214390740 2007-04-27T20:16:55.582940 GET /
 
   Includes the request method and path.
 
 - Got request input:
 
-  I -1214390740 2007-04-27T20:16:55 0
+  I -1214390740 2007-04-27T20:16:55.605791 0
 
   Includes the request content length.
 
 - Entered application thread:
 
-  C -1214390740 2007-04-27T20:16:55
+  C -1214390740 2007-04-27T20:16:55.703829
 
 - Application done:
 
-  A -1223774356 2007-04-27T20:16:55 500 84
+  A -1223774356 2007-04-27T20:16:55.890371 500 84
 
   Includes the response content length.
 
 - Request done:
 
-  E -1223774356 2007-04-27T20:16:55
+  E -1223774356 2007-04-27T20:16:55.913855
 
 In addition, application startup is logged with an 'S' record:
 
-  S 0 2007-04-27T20:24:29
+  S 0 2007-04-27T20:24:29.013922
 
 Tracelog extension records are prefixed with a '-':
 
-  - -1223774356 2008-09-12T15:51:05 zc.example.extension message
+  - -1223774356 2008-09-12T15:51:05.559302 zc.example.extension message
 
 To create a trace log, include the zc.zservertracelog package in your
 site ZCML configuration.  Also, define a logger section in zope.conf::

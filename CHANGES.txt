@@ -2,6 +2,12 @@
  Changes
 =========
 
+1.2.0 (unreleased)
+------------------
+
+- sub-second resolution in timestamps
+
+
 1.1.1 (2008-11-21)
 ------------------
 

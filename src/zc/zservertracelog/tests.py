@@ -24,8 +24,8 @@ import zope.testing.renormalizing
 
 checker = zope.testing.renormalizing.RENormalizing([
     # normalize the channel id and iso8601 timestamp
-    (re.compile(r'-?\d+ \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}'),
-        '23418928 2008-08-26T10:55:00'),
+    (re.compile(r'-?\d+ \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{6}'),
+        '23418928 2008-08-26 10:55:00.000000'),
     ])
 
 
