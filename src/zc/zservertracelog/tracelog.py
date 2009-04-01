@@ -102,8 +102,8 @@ class Server(wsgihttpserver.WSGIHTTPServer):
             # Prepare the headers for output
             status, reason = status_match(status).groups()
             task.setResponseStatus(status, reason)
-            if 'wsgi.user_name' in env:
-                task.setAuthUserName(env['wsgi.user_name'])
+            if 'wsgi.logging_info' in env:
+                task.setAuthUserName(env['wsgi.logging_info'])
             task.appendResponseHeaders(['%s: %s' % i for i in headers])
 
             # Return the write method used to write the response data.
