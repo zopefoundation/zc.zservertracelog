@@ -14,10 +14,13 @@
 ##############################################################################
 """Yet another trace log analysis tool
 """
+import datetime
+import optparse
+import sys
+import time
 
-import datetime, optparse, sys
 
-class Request:
+class Request(object):
 
     output_bytes = '-'
 
@@ -47,13 +50,14 @@ class Request:
 
     @property
     def app_seconds(self):
-        return (self.app_time - self.start_app_time).seconds
+        return seconds_difference(self.app_time, self.start_app_time)
 
     @property
     def total_seconds(self):
-        return (self.end - self.start).seconds
+        return seconds_difference(self.end, self.start)
 
-class Times:
+
+class Times(object):
 
     tid = 1l
 
@@ -93,17 +97,19 @@ class Times:
 
         n = len(times)
         m = self.median
-        return "%9.1f %5d %6.0f %6.2f %6.2f %6.0f %5d" % (
+        return "%9.1f %5d %6.2f %6.2f %6.2f %6.2f %5d" % (
             self.impact, n, times[0], m, self.mean, times[-1], self.hangs)
 
     def html(self):
         times = self.times
         if not times:
-            print td('', 0, '', '', '', '', self.hangs)
+            impact = '<a name="u%s">&nbsp;</a>' % self.tid
+            print td(
+                impact, 0, '&nbsp;', '&nbsp;', '&nbsp;', '&nbsp;', self.hangs)
         else:
+            impact = '<a name="u%s">%s</a>' % (self.tid, self.impact)
             n = len(times)
             m = self.median
-            impact = '<a name="u%s">%s' % (self.tid, self.impact)
             print td(impact, n, times[0], m, self.mean, times[-1],
                      self.hangs)
 
@@ -113,16 +119,34 @@ class Times:
         result.hangs = self.hangs + other.hangs
         return result
 
-def parsedt(s):
-    date, time = s.split(' ')
-    h_m_s, ms = time.split('.')
-    return datetime.datetime(*(
-        map(int, date.split('-'))
-        +
-        map(int, h_m_s.split(':'))
-        +
-        [int(ms)]
-        ))
+
+def seconds_difference(dt1, dt2):
+    delta = dt1 - dt2
+    micros = float('0.' + str(delta.microseconds))
+    return delta.seconds + micros
+
+
+def parse_line(line):
+    parts = line.split(' ', 4)
+    code, rid, rdate, rtime = parts[:4]
+    if len(parts) > 4:
+        msg = parts[4]
+    else:
+        msg = ''
+    return (code, rid, rdate + ' ' + rtime, msg)
+
+
+def parse_datetime(s):
+    # XXX this chokes on tracelogs with the 'T' time separator.
+    date, t = s.split(' ')
+    try:
+        h_m_s, ms = t.split('.')
+    except ValueError:
+        h_m_s = t.strip()
+        ms = '0'
+    args = [int(arg) for arg in (date.split('-') + h_m_s.split(':') + [ms])]
+    return datetime.datetime(*args)
+
 
 def main(args=None):
     if args is None:
@@ -171,9 +195,10 @@ def main(args=None):
         file = open(file)
 
     for record in file:
-        record = record.split()
-        typ, rid, dt, min = record[:4]
-        dt = parsedt(' '.join([dt,min]))
+        typ, rid, strtime, msg = parse_line(record)
+        min = strtime.split('.')[0]
+        min = min[:-3]
+        dt = parse_datetime(strtime)
         if dt == restart:
             continue
         while dt > restart:
@@ -215,10 +240,14 @@ def main(args=None):
                     input -= 1
 
             input += 1
-            request = Request(dt, *record[3:5])
+            method, url = msg.split(' ', 1)
+            request = Request(dt, method, url.strip())
             if remove_prefix and request.url.startswith(remove_prefix):
                 request.url = request.url[len(remove_prefix):]
             requests[rid] = request
+            times = urls.get(request.url)
+            if times is None:
+                times = urls[request.url] = Times()
         elif typ == 'I':
             if rid in requests:
                 input -= 1
@@ -233,7 +262,12 @@ def main(args=None):
             if rid in requests:
                 apps -= 1
                 output += 1
-                requests[rid].A(dt, *record[3:5])
+                try:
+                    response_code, bytes_len = msg.split()
+                except ValueError:
+                    response_code = '500'
+                    bytes_len = len(msg)
+                requests[rid].A(dt, response_code, bytes_len)
         elif typ == 'E':
             if rid in requests:
                 output -= 1
@@ -242,10 +276,7 @@ def main(args=None):
                 spr += request.total_seconds
                 spa += request.app_seconds
                 n += 1
-                url = "%s -> %s" % (request.url, request.response)
-                times = urls.get(url)
-                if times is None:
-                    times = urls[url] = Times()
+                times = urls[request.url]
                 times.finished(request)
 
         elif typ in 'SX':
@@ -261,6 +292,7 @@ def main(args=None):
         else:
             print 'WTF', record
 
+    record_hung(urls, requests)
     print_app_requests(requests, dt,
                        options.old_requests,
                        options.app_requests,
@@ -344,7 +376,7 @@ def minutes_footer_html():
     print '</table>'
 
 def output_minute_text(lmin, requests, input, wait, apps, output, n, spr, spa):
-    print lmin.replace('T', ' '), " %5d I=%3d W=%3d A=%3d O=%5d " % (
+    print lmin, "%5d I=%3d W=%3d A=%3d O=%4d" % (
         len(requests), input, wait, apps, output),
     if n:
         print "N=%4d %10.2f %10.2f" % (n, spr/n, spa/n)
@@ -363,9 +395,11 @@ def output_minute_html(lmin, requests, input, wait, apps, output, n, spr, spa):
     else:
         print '<tr>'
     apps = '<font size="+2"><strong>%s</strong></font>' % apps
-    print td(lmin.replace('T', ' '), len(requests), input, wait, apps, output)
+    print td(lmin, len(requests), input, wait, apps, output)
     if n:
         print td(n, "%10.2f" % (spr/n), "%10.2f" % (spa/n))
+    else:
+        print td(n, '&nbsp;', '&nbsp;')
     print '</tr>'
 
 def find_restarts(event_log):
@@ -382,10 +416,10 @@ def record_hung(urls, requests):
             times = urls[request.url] = Times()
         times.hung()
 
-def print_app_requests_text(requests, dt, min_seconds, max_requests, urls,
+def print_app_requests_text(requests, dt, min_seconds, max_requests, allurls,
                        label=''):
     requests = [
-        ((dt-request.start).seconds, request)
+        (seconds_difference(dt, request.start), request)
         for request in requests.values()
         if request.state == 'app'
     ]
@@ -431,7 +465,7 @@ def print_app_requests_html(requests, dt, min_seconds, max_requests, allurls,
             print label
             label = ''
         if not printed:
-            minutes_footer_html()
+            print '</table>'
             print '<table border="1">'
             print '<tr><th>age</th><th>R</th><th>url</th><th>state</th></tr>'
             printed = True
@@ -448,8 +482,7 @@ def print_app_requests_html(requests, dt, min_seconds, max_requests, allurls,
         print '</table>'
         minutes_header_html()
 
-parser = optparse.OptionParser("""
-Usage: %prog [options] trace_log_file
+parser = optparse.OptionParser("""%prog [options] trace_log_file
 
 Output trace log data showing:
 

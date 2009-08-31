@@ -17,17 +17,18 @@
 __docformat__ = "reStructuredText"
 
 from zope.testing import doctest
+import os
 import re
 import unittest
 import zope.testing.renormalizing
 
+here = os.path.dirname(os.path.abspath(__file__))
 
 checker = zope.testing.renormalizing.RENormalizing([
     # normalize the channel id and iso8601 timestamp
     (re.compile(r'-?\d+ \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{6}'),
         '23418928 2008-08-26 10:55:00.000000'),
     ])
-
 
 _null_app = lambda environ, start_response: None
 
@@ -46,8 +47,12 @@ def setUp(test):
     test.globs['FauxApplication'] = FauxApplication
 
 
+def analysis_setUp(test):
+    test.globs['sample_log'] = here + '/samples/trace.log'
+
+
 def test_suite():
-    return unittest.TestSuite([
+    tests = [
         doctest.DocFileTest(
             'README.txt',
             optionflags=(
@@ -57,4 +62,10 @@ def test_suite():
             checker=checker,
             setUp=setUp,
             ),
-        ])
+        doctest.DocFileTest(
+            'tracereport.txt',
+            checker=checker,
+            setUp=analysis_setUp),
+        ]
+
+    return unittest.TestSuite(tests)
