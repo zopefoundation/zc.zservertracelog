@@ -46,10 +46,15 @@ Tracelog extension records are prefixed with a '-':
   - -1223774356 2008-09-12T15:51:05.559302 zc.example.extension message
 
 To create a trace log, include the zc.zservertracelog package in your
-site ZCML configuration.  Also, define a logger section in zope.conf::
+site ZCML configuration.  Also, define a logger section in zope.conf:
+
+.. warning: The logger section is named "zc.tracelog" not "zc.zservertracelog";
+    that might change one day.
+
+::
 
   <logger>
-    name zc.zservertracelog
+    name zc.tracelog
     propagate false
 
     <logfile>

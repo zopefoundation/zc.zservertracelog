@@ -1,6 +1,11 @@
-=========
- Changes
-=========
+Changes
+=======
+
+1.2.1 (2010-01-27)
+------------------
+
+- fix reST headings so PyPI page renders properly
+- add a warning about the strange logger name
 
 
 1.2.0 (2009-08-31)
