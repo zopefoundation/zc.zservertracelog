@@ -36,8 +36,9 @@ There is an event handler to log when the Z server starts.
 Tracing Applications
 ====================
 
-The tracelog machinery is implemented as a WSGI layer, so we'll pass a fake
-WSGI application to tracelog for these examples.
+The tracelog machinery is primarily implemented as an extension to the
+zope.server WSGI server.  To test the tracelog machinery, we'll create
+our own application.
 
     >>> faux_app = FauxApplication()
 
@@ -69,6 +70,22 @@ Process a simple request.
     A 23423600 2008-08-27 10:54:08.000000 200 ?
     E 23423600 2008-08-27 10:54:08.000000
 
+Here we get records for each stage in the request:
+
+B
+   The request began
+
+I
+   Input was read.
+
+C
+   An application thread began processing the request.
+
+A
+   The esponse was computed.
+
+E
+   The request ended.
 
 Application Errors
 ==================
@@ -102,7 +119,11 @@ response.  To show this, we'll set up our test application to return a
 response that produces an error when written to.
 
     >>> def response_of_wrong_type(*args, **kwargs):
-    ...     return object()
+    ...     def f():
+    ...         if 0:
+    ...             yield 1
+    ...         raise ValueError("sample error")
+    ...     return f()
     >>> faux_app.app_hook = response_of_wrong_type
 
 Invoking the request produces log entries for every trace point, and the
@@ -116,7 +137,7 @@ error is written to the *Request End (E)* trace entry.
     I 21651664 2008-09-02 13:59:02.000000 0
     C 21651664 2008-09-02 13:59:02.000000
     A 21651664 2008-09-02 13:59:02.000000 200 ?
-    E 21651664 2008-09-02 13:59:02.000000 Error: iteration over non-sequence
+    E 21651664 2008-09-02 13:59:02.000000 Error: sample error
 
 Let's clean up before moving on.
 
@@ -198,3 +219,72 @@ Here is an example application that adds a custom entry to the tracelog.
     - 21569456 2008-09-12 15:51:05.000000 beep! beep!
     A 21569456 2008-09-12 15:51:05.000000 200 ?
     E 21569456 2008-09-12 15:51:05.000000
+
+
+Database statistics
+===================
+
+zc.zservertracelog provides event subscrivers that gather statistics
+about database usage in a request.  It assumes that requests have
+'ZODB.interfaces.IConnection' annotations that are ZODB database
+connections. To demonstrate how this works, we'll create a number of
+stubs:
+
+    >>> class Connection:
+    ...     reads = writes = 0
+    ...     db = lambda self: self
+    ...     getTransferCounts = lambda self: (self.reads, self.writes)
+    ...     def __init__(self, environ, *names):
+    ...         self.get = environ.get
+    ...         self.databases = names
+    ...         self._connections = dict((name, Connection(environ))
+    ...                                  for name in names)
+    ...         self.get_connection = self._connections.get
+    ...     request = property(lambda self: self)
+    ...     @property
+    ...     def annotations(self):
+    ...         return {'ZODB.interfaces.IConnection': self}
+    ...     def update(self, name, reads=0, writes=0):
+    ...         c = self._connections[name]
+    ...         c.reads, c.writes = reads, writes
+
+The Connection stub is kind of heinous. :) It actually stubs out
+zope.app.publisher request events, requests, connections, and
+databases.
+
+We simulate a request that calls the traversal hooks a couple of
+times,does some database activity and redoes requests due to conflicts.
+
+    >>> def dbapp1(environ, start_response):
+    ...     conn = Connection(environ, '', 'x', 'y')
+    ...     conn.update('', 1, 1)
+    ...     conn.update('x', 2, 2)
+    ...     zc.zservertracelog.tracelog.before_traverse(conn)
+    ...     conn.update('', 3, 1)
+    ...     zc.zservertracelog.tracelog.before_traverse(conn)
+    ...     conn.update('', 5, 3)
+    ...     conn.update('y', 1, 0)
+    ...     zc.zservertracelog.tracelog.request_ended(conn)
+    ...     zc.zservertracelog.tracelog.before_traverse(conn)
+    ...     conn.update('', 6, 3)
+    ...     zc.zservertracelog.tracelog.before_traverse(conn)
+    ...     conn.update('', 7, 4)
+    ...     conn.update('y', 3, 0)
+    ...     zc.zservertracelog.tracelog.request_ended(conn)
+
+    >>> faux_app.app_hook = dbapp1
+
+    >>> invokeRequest(req1)
+    B 49234448 2010-04-07 17:03:41.229648 GET /test-req1
+    I 49234448 2010-04-07 17:03:41.229811 0
+    C 49234448 2010-04-07 17:03:41.229943
+    D 49234448 2010-04-07 17:03:41.230131 4 2 y 1 0
+    D 49234448 2010-04-07 17:03:41.230264 2 1 y 2 0
+    A 49234448 2010-04-07 17:03:41.230364 200 ?
+    E 23418928 2008-08-26 10:55:00.000000
+
+Here we got multiple D records due to conflicts. We show database
+activity for those databases for which there was any. The databases
+are sorted by name, with the unnamed database coming first.  For each
+database, the number of object's read and written are provided.
+

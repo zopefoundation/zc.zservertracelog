@@ -17,12 +17,23 @@ from zope.app.server import servertype
 from zope.app.wsgi import WSGIPublisherApplication
 from zope.server.http import wsgihttpserver
 from zope.server.http.commonaccesslogger import CommonAccessLogger
+
+# Gaaaa, these have moved:
+try:
+    from zope.publisher.interfaces import BeforeTraverseEvent
+    from zope.publisher.interfaces import EndRequestEvent
+except ImportError:
+    from zope.app.publication.interfaces import BeforeTraverseEvent
+    from zope.app.publication.interfaces import EndRequestEvent
+
+
 import datetime
 import logging
 import re
 import zc.zservertracelog.interfaces
 import zope.app.appsetup.interfaces
 import zope.component
+import zope.app.publication.interfaces
 import zope.server.http.httprequestparser
 import zope.server.http.httpserverchannel
 
@@ -49,6 +60,8 @@ def get(request):
 
 class TraceLog(object):
     zope.interface.implements(zc.zservertracelog.interfaces.ITraceLog)
+
+    transfer_counts = None
 
     def __init__(self, channel_id):
         self.channel_id = channel_id
@@ -154,3 +167,38 @@ pmhttp = servertype.ServerType(
 @zope.component.adapter(zope.app.appsetup.interfaces.IProcessStartingEvent)
 def started(event):
     tracelog.info('S 0 %s', datetime.datetime.now())
+
+@zope.component.adapter(BeforeTraverseEvent)
+def before_traverse(event):
+    request = event.request
+    tl = request.get('zc.zservertracelog.interfaces.ITraceLog')
+    if tl is None:
+        return
+    if tl.transfer_counts is None:
+        connection = request.annotations['ZODB.interfaces.IConnection']
+        tl.transfer_counts = dict(
+            (name, connection.get_connection(name).getTransferCounts())
+            for name in connection.db().databases)
+
+@zope.component.adapter(EndRequestEvent)
+def request_ended(event):
+    request = event.request
+    tl = request.get('zc.zservertracelog.interfaces.ITraceLog')
+    if tl is None:
+        return
+    initial_counts = tl.transfer_counts
+    if not initial_counts:
+        return
+    tl.transfer_counts = None           # Reset in case of conflict
+    connection = request.annotations['ZODB.interfaces.IConnection']
+    data = []
+    for name in connection.db().databases:
+        conn = connection.get_connection(name)
+        r, w = conn.getTransferCounts()
+        ir, iw = initial_counts[name]
+        r -= ir
+        w -= iw
+        if r or w:
+            data.append((name, r, w))
+    msg = ' '.join(' '.join(map(str, r)) for r in sorted(data))
+    _log(tl.channel_id, 'D', msg.strip())

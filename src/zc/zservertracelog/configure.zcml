@@ -16,5 +16,7 @@
   <adapter factory="zc.zservertracelog.tracelog.get" />
 
   <subscriber handler=".tracelog.started" />
+  <subscriber handler=".tracelog.before_traverse" />
+  <subscriber handler=".tracelog.request_ended" />
 
 </configure>

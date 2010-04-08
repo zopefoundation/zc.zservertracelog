@@ -1,6 +1,13 @@
 Changes
 =======
 
+1.3.0 (2010-04-??)
+------------------
+
+- Added 'D' records providing database transfer counts.
+  This is somewhat experimental. The tracereport script ignores D
+  records.
+
 1.2.1 (2010-01-27)
 ------------------
 
