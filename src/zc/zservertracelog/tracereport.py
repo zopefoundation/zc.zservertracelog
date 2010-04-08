@@ -289,6 +289,8 @@ def main(args=None):
             requests = {}
             input = apps = output = n = wait = 0
             spr = spa = 0.0
+        elif typ == 'D':
+            pass # ignore db stats for now
         else:
             print 'WTF', record
 
@@ -446,19 +448,19 @@ def print_app_requests_text(requests, dt, min_seconds, max_requests, allurls,
 def print_app_requests_html(requests, dt, min_seconds, max_requests, allurls,
                             label=''):
     requests = [
-        ((dt-request.start).seconds, request)
+        ((dt-request.start).seconds, request.url, request)
         for request in requests.values()
         if request.state == 'app'
     ]
 
     urls = {}
-    for s, request in requests:
-        urls[request.url] = urls.get(request.url, 0) + 1
+    for s, url, request in requests:
+        urls[url] = urls.get(url, 0) + 1
 
     requests.sort()
     requests.reverse()
     printed = False
-    for s, request in requests[:max_requests]:
+    for s, url, request in requests[:max_requests]:
         if s < min_seconds:
             continue
         if label:
@@ -469,7 +471,6 @@ def print_app_requests_html(requests, dt, min_seconds, max_requests, allurls,
             print '<table border="1">'
             print '<tr><th>age</th><th>R</th><th>url</th><th>state</th></tr>'
             printed = True
-        url = request.url
         repeat = urls[url]
         print '<tr>'
         if repeat <= 1:
