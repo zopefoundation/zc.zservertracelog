@@ -35,10 +35,6 @@ setup(
     long_description=(
         read('README.txt')
         + '\n\n'
-        + 'Detailed Documentation\n'
-        + '**********************\n'
-        + '\n\n'
-        + read('src', 'zc', 'zservertracelog', 'README.txt')
         + '\n\n'
         + read('CHANGES.txt')
     ),

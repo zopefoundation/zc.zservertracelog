@@ -283,8 +283,9 @@ times,does some database activity and redoes requests due to conflicts.
     A 49234448 2010-04-07 17:03:41.230364 200 ?
     E 23418928 2008-08-26 10:55:00.000000
 
-Here we got multiple D records due to conflicts. We show database
-activity for those databases for which there was any. The databases
-are sorted by name, with the unnamed database coming first.  For each
-database, the number of object's read and written are provided.
+Here we got multiple D records due to (simulated) conflicts. We show
+database activity for those databases for which there was any. The
+databases are sorted by name, with the unnamed database coming first.
+For each database, the number of object's loaded and saved are
+provided.
 
