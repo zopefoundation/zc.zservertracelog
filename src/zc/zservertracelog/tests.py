@@ -28,6 +28,8 @@ checker = zope.testing.renormalizing.RENormalizing([
     # normalize the channel id and iso8601 timestamp
     (re.compile(r'-?\d+ \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{6}'),
         '23418928 2008-08-26 10:55:00.000000'),
+    (re.compile(r'^usage: '), 'Usage: '),
+    (re.compile(r'options:'), 'Options:'),
     ])
 
 _null_app = lambda environ, start_response: None

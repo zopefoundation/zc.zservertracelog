@@ -5,6 +5,8 @@ Analyzing Tracelogs
 `tracereport.py` provides a basic means to analyze a tracelog and generate a
 report.
 
+    >>> import os
+    >>> os.environ['COLUMNS'] = '70'
     >>> import zc.zservertracelog.tracereport
 
 The '--help' option displays the following usage information:
@@ -13,7 +15,7 @@ The '--help' option displays the following usage information:
     ...     zc.zservertracelog.tracereport.main(['--help'])
     ... except SystemExit:
     ...     pass
-    usage: test [options] trace_log_file
+    Usage: test [options] trace_log_file
     <BLANKLINE>
     Output trace log data showing:
     <BLANKLINE>
@@ -38,28 +40,30 @@ The '--help' option displays the following usage information:
     <BLANKLINE>
     <BLANKLINE>
     <BLANKLINE>
-    options:
+    Options:
       -h, --help            show this help message and exit
       -a APPS, --app-request-threshold=APPS
-                             Number of pending application requests at which
-                            detailed request information if printed.
+                             Number of pending application requests at
+                            which detailed request information if
+                            printed.
       -r APP_REQUESTS, --app-requests=APP_REQUESTS
-                             How many requests to show when the maximum number of
-                            pending apps is exceeded.
+                             How many requests to show when the maximum
+                            number of pending apps is exceeded.
       -o OLD_REQUESTS, --old-requests=OLD_REQUESTS
                              Number of seconds beyond which a request is
                             considered old.
       -e EVENT_LOG, --event-log=EVENT_LOG
-                             The name of an event log that goes with the trace
-                            log.  This is used to determine when the server is
-                            restarted, so that the running trace data structures
-                            can be reinitialized.
+                             The name of an event log that goes with the
+                            trace log.  This is used to determine when
+                            the server is restarted, so that the running
+                            trace data structures can be reinitialized.
       --html                 Generate HTML output.
       --remove-prefix=REMOVE_PREFIX
                              A prefex to be removed from URLS.
       --summary-only         Only output summary lines.
       --summary-lines=SUMMARY_LINES
                             The number of summary lines to show
+
 
 Here, we display the summarized report for a sample trace log.
 
