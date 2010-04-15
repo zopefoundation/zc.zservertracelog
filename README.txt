@@ -14,7 +14,7 @@ To create a trace log, you need to:
     <include package="zc.zservertracelog" />
 
 - Define where messages to the 'zc.tracelog' logger should go. In your
-  zope.cond file, use something like::
+  zope.conf file, use something like::
 
     <logger>
       name zc.tracelog
