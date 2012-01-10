@@ -274,3 +274,28 @@ databases are sorted by name, with the unnamed database coming first.
 For each database, the number of object's loaded and saved are
 provided.
 
+Since not all requests necessarily have a ZODB connection in their annotations
+(consider, e.g. ``GET /++etc++process``), let's make sure this works too
+
+    >>> class Request:
+    ...     def __init__(self, environ):
+    ...         self.get = environ.get
+    ...         self.annotations = {}
+    ...     # let this stub pretend to be a RequestEvent too
+    ...     request = property(lambda self: self)
+
+    >>> def dbapp2(environ, start_response):
+    ...     req = Request(environ)
+    ...     zc.zservertracelog.tracelog.before_traverse(req)
+    ...     zc.zservertracelog.tracelog.before_traverse(req)
+    ...     zc.zservertracelog.tracelog.request_ended(req)
+
+    >>> faux_app.app_hook = dbapp2
+
+    >>> invokeRequest(req1)
+    B 146419788 2012-01-10 03:10:05.501841 GET /test-req1
+    I 146419788 2012-01-10 03:10:05.502148 0
+    C 146419788 2012-01-10 03:10:05.502370
+    A 146419788 2012-01-10 03:10:05.502579 200 ?
+    E 146419788 2012-01-10 03:10:05.502782
+

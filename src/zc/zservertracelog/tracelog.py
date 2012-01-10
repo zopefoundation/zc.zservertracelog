@@ -174,7 +174,10 @@ def before_traverse(event):
     if tl is None:
         return
     if tl.transfer_counts is None:
-        connection = request.annotations['ZODB.interfaces.IConnection']
+        connection = request.annotations.get('ZODB.interfaces.IConnection')
+        # Not all requests have a ZODB connection; consider /++etc++process
+        if connection is None:
+            return
         tl.transfer_counts = dict(
             (name, connection.get_connection(name).getTransferCounts())
             for name in connection.db().databases)
@@ -189,7 +192,9 @@ def request_ended(event):
     if not initial_counts:
         return
     tl.transfer_counts = None           # Reset in case of conflict
-    connection = request.annotations['ZODB.interfaces.IConnection']
+    connection = request.annotations.get('ZODB.interfaces.IConnection')
+    if connection is None:
+        return
     data = []
     for name in connection.db().databases:
         conn = connection.get_connection(name)
