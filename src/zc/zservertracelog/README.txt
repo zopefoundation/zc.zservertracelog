@@ -16,7 +16,7 @@ For these examples, we'll add a log handler that outputs to standard out.
     >>> stdout_handler = logging.StreamHandler(sys.stdout)
 
 The logger's name is not the package name, but "zc.tracelog" for backward
-compatability.
+compatibility.
 
     >>> logger = logging.getLogger('zc.tracelog')
     >>> logger.setLevel(logging.INFO)
@@ -82,7 +82,7 @@ C
    An application thread began processing the request.
 
 A
-   The esponse was computed.
+   The response was computed.
 
 E
    The request ended.
@@ -182,21 +182,6 @@ The tracelog preserves request query strings.
     A 21598352 2008-09-12 11:40:27.000000 200 ?
     E 21598352 2008-09-12 11:40:27.000000
 
-Empty query strings are also preserved.
-
-    >>> req4 = """\
-    ... GET /test-req4/? HTTP/1.1
-    ... Host: www.example.com/empty-query-string
-    ...
-    ... """
-
-    >>> invokeRequest(req4)
-    B 21598352 2008-09-12 11:40:27.000000 GET /test-req4/?
-    I 21598352 2008-09-12 11:40:27.000000 0
-    C 21598352 2008-09-12 11:40:27.000000
-    A 21598352 2008-09-12 11:40:27.000000 200 ?
-    E 21598352 2008-09-12 11:40:27.000000
-
 
 Adding Additional Entries to the Trace Log
 ==========================================
@@ -224,7 +209,7 @@ Here is an example application that adds a custom entry to the tracelog.
 Database statistics
 ===================
 
-zc.zservertracelog provides event subscrivers that gather statistics
+zc.zservertracelog provides event subscribers that gather statistics
 about database usage in a request.  It assumes that requests have
 'ZODB.interfaces.IConnection' annotations that are ZODB database
 connections. To demonstrate how this works, we'll create a number of
@@ -253,7 +238,7 @@ zope.app.publisher request events, requests, connections, and
 databases.
 
 We simulate a request that calls the traversal hooks a couple of
-times,does some database activity and redoes requests due to conflicts.
+times, does some database activity and redoes requests due to conflicts.
 
     >>> def dbapp1(environ, start_response):
     ...     conn = Connection(environ, '', 'x', 'y')

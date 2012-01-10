@@ -82,10 +82,9 @@ class Channel(zope.server.http.httpserverchannel.HTTPServerChannel):
 
     def handle_request(self, parser):
         full_path = parser.path
-        if parser.query:
+        # If parser.query == '' we want full_path with a trailing '?'
+        if parser.query is not None:
             full_path += '?%s' % parser.query
-        elif parser.query is not None:
-            full_path += '?'
 
         cid = id(self)
         _log(cid, 'B', '%s %s' % (parser.command, full_path), parser.__B)
