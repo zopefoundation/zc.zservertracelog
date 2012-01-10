@@ -52,7 +52,11 @@ setup(
             ],
     extras_require=dict(
         test=[
-            'zope.testing',
+            # Our test suite uses zope.testing.doctest.INTERPRET_FOOTNOTES
+            # That feature is gone from zope.testing 4.0.0 with the entire
+            # zope.testing.doctest fork of the stdlib's doctest.  The proper
+            # way forward would be to switch to Manuel.
+            'zope.testing < 4.0.0',
             ]),
     include_package_data=True,
     zip_safe=False,
