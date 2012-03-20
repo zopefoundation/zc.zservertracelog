@@ -14,7 +14,7 @@
 import os
 from setuptools import setup, find_packages
 
-name = 'zc.zservertracelog'
+name, version = 'zc.zservertracelog', 0
 
 entry_points = """
 [console_scripts]
@@ -27,7 +27,7 @@ def read(*rnames):
 
 setup(
     name=name,
-    version='1.3.1dev',
+    version=version,
     url='http://pypi.python.org/pypi/' + name,
     author='Zope Corporation and Contributors',
     author_email='zope3-dev@zope.org',
