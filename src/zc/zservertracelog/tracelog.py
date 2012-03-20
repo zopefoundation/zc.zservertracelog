@@ -61,13 +61,11 @@ def get(request):
 class TraceLog(object):
     zope.interface.implements(zc.zservertracelog.interfaces.ITraceLog)
 
-    transfer_counts = None
-
     def __init__(self, channel_id):
         self.channel_id = channel_id
 
-    def log(self, msg=None):
-        _log(self.channel_id, '-', msg)
+    def log(self, msg=None, code='-'):
+        _log(self.channel_id, code, msg)
 
 
 class Parser(zope.server.http.httprequestparser.HTTPRequestParser):
@@ -173,7 +171,7 @@ def before_traverse(event):
     tl = request.get('zc.zservertracelog.interfaces.ITraceLog')
     if tl is None:
         return
-    if tl.transfer_counts is None:
+    if getattr(tl, 'transfer_counts', None) is None:
         connection = request.annotations.get('ZODB.interfaces.IConnection')
         # Not all requests have a ZODB connection; consider /++etc++process
         if connection is None:
@@ -188,7 +186,7 @@ def request_ended(event):
     tl = request.get('zc.zservertracelog.interfaces.ITraceLog')
     if tl is None:
         return
-    initial_counts = tl.transfer_counts
+    initial_counts = getattr(tl, 'transfer_counts', None)
     if not initial_counts:
         return
     tl.transfer_counts = None           # Reset in case of conflict
@@ -205,4 +203,4 @@ def request_ended(event):
         if r or w:
             data.append((name, r, w))
     msg = ' '.join(' '.join(map(str, r)) for r in sorted(data))
-    _log(tl.channel_id, 'D', msg.strip())
+    tl.log(msg.strip(), 'D')
