@@ -22,6 +22,8 @@ import re
 import unittest
 import zope.testing.renormalizing
 
+from zc.zservertracelog.fseek import FSeekTest
+
 here = os.path.dirname(os.path.abspath(__file__))
 
 checker = zope.testing.renormalizing.RENormalizing([
@@ -68,6 +70,7 @@ def test_suite():
             'tracereport.txt',
             checker=checker,
             setUp=analysis_setUp),
-        ]
+        unittest.makeSuite(FSeekTest),
+    ]
 
     return unittest.TestSuite(tests)

@@ -17,7 +17,21 @@
 import datetime
 import optparse
 import sys
-import time
+import os.path
+
+from zc.zservertracelog.fseek import fseek
+
+
+# Date format and default offset.
+DATE_FORMATS = (
+    ('%Y-%m-%d %H:%M:%S', ''),
+    ('%Y-%m-%d %H:%M', 'seconds=59'),
+    ('%Y-%m-%d %H', 'minutes=59, seconds=59'),
+    ('%Y-%m-%d', 'hours=23, minutes=59, seconds=59'),
+    ('%Y-%m', 'days=31, hours=23, minutes=59, seconds=59'),
+)
+
+OFFSET_VALID_KEYS = ('days', 'minutes', 'seconds')
 
 
 class Request(object):
@@ -148,11 +162,93 @@ def parse_datetime(s):
     return datetime.datetime(*args)
 
 
+def parse_offset(offset):
+    offset = offset.replace(' ', '')
+    if offset:
+        items = []
+        for item in offset.split(','):
+            key, val = item.split('=')
+            items.append((key, int(val)))
+        kwargs = dict(items)
+    else:
+        kwargs = dict()
+    kwargs['microseconds'] = 999999
+    return datetime.timedelta(**kwargs)
+
+
+def parse_date_interval(interval_string):
+    # Get offset
+    offset = ''
+    negative_offset = False
+    if ' +' in interval_string:
+        date_string, offset = interval_string.split(' +')
+    elif ' -' in interval_string:
+        date_string, offset = interval_string.split(' -')
+        negative_offset = True
+    else:
+        date_string = interval_string
+
+    # Get datetime
+    date = None
+    date_string = date_string.strip()
+    for date_format, date_format_offset in DATE_FORMATS:
+        try:
+            date = datetime.datetime.strptime(date_string, date_format)
+        except (ValueError, OverflowError):
+            pass
+        else:
+            break
+    if date is None:
+        raise TypeError("Unknown date format of '%s'." % interval_string)
+
+    # Return datetime interval tuple
+    offset = offset or date_format_offset
+    offset = parse_offset(offset)
+    if negative_offset:
+        return (date - offset, date)
+    else:
+        return (date, date + offset)
+
+
+def time_from_line(line):
+    x, x, strtime, x = parse_line(line)
+    return parse_datetime(strtime)
+
+
+def iterlog(file, date_interval=None):
+    size = 0
+    if file == '-':
+        file = sys.stdin
+    else:
+        size = os.path.getsize(file)
+        file = open(file)
+
+    date_from, date_to = date_interval or (None, None)
+    if date_from and size:
+        fseek(file, size, date_from, time_from_line)
+
+    for line in file:
+        typ, rid, strtime, msg = parse_line(line)
+        dt = parse_datetime(strtime)
+        if date_to and date_to < dt:
+            break
+        elif date_from and date_from > dt:
+            continue
+        else:
+            yield line, dt, typ, rid, strtime, msg
+
+
 def main(args=None):
     if args is None:
         args = sys.argv[1:]
 
     options, args = parser.parse_args(args)
+
+    if options.date:
+        date_interval = parse_date_interval(options.date)
+    else:
+        date_interval = None
+
     if options.event_log:
         restarts = find_restarts(options.event_log)
     else:
@@ -188,17 +284,11 @@ def main(args=None):
     restart = restarts.pop(0)
     minutes_header()
     remove_prefix = options.remove_prefix
+    dt = None
 
-    if file == '-':
-        file = sys.stdin
-    else:
-        file = open(file)
-
-    for record in file:
-        typ, rid, strtime, msg = parse_line(record)
+    for record, dt, typ, rid, strtime, msg in iterlog(file, date_interval):
         min = strtime.split('.')[0]
         min = min[:-3]
-        dt = parse_datetime(strtime)
         if dt == restart:
             continue
         while dt > restart:
@@ -295,11 +385,12 @@ def main(args=None):
             print 'WTF', record
 
     record_hung(urls, requests)
-    print_app_requests(requests, dt,
-                       options.old_requests,
-                       options.app_requests,
-                       urls,
-                       "Left over:")
+    if dt:
+        print_app_requests(requests, dt,
+                           options.old_requests,
+                           options.app_requests,
+                           urls,
+                           "Left over:")
 
     minutes_footer()
 
@@ -545,6 +636,8 @@ Only output summary lines.
 parser.add_option("--summary-lines", dest='summary_lines',
                   type="int", default=999999999,
                   help="""The number of summary lines to show""")
+parser.add_option("--date", "-d", dest='date', default=None,
+                  help="""Date range that will be parsed from log""")
 
 
 
