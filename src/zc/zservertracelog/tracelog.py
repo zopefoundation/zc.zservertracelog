@@ -104,24 +104,15 @@ class Server(wsgihttpserver.WSGIHTTPServer):
         """Overrides HTTPServer.executeRequest()."""
         cid = id(task.channel)
         _log(cid, 'C')
-        env = task.getCGIEnvironment()
-        env['wsgi.input'] = task.request_data.getBodyStream()
+        env = self._constructWSGIEnvironment(task)
         env['zc.zservertracelog.interfaces.ITraceLog'] = TraceLog(cid)
-
-        def start_response(status, headers):
-            # Prepare the headers for output
-            status, reason = status_match(status).groups()
-            task.setResponseStatus(status, reason)
-            if 'wsgi.logging_info' in env:
-                task.setAuthUserName(env['wsgi.logging_info'])
-            task.appendResponseHeaders(['%s: %s' % i for i in headers])
-
-            # Return the write method used to write the response data.
-            return wsgihttpserver.fakeWrite
+        if 'wsgi.logging_info' in env:
+            task.setAuthUserName(env['wsgi.logging_info'])
 
         # Call the application to handle the request and write a response
         try:
-            response = self.application(env, start_response)
+            response = self.application(
+                env, wsgihttpserver.curriedStartResponse(task))
         except Exception, v:
             _log(cid, 'A', 'Error: %s' % v)
             _log(cid, 'E')
@@ -139,7 +130,8 @@ class Server(wsgihttpserver.WSGIHTTPServer):
             _log(cid, 'A', '%s %s' % (getattr(task, 'status', '?'), length))
 
             try:
-                task.write(response)
+                for value in response:
+                    task.write(value)
             except Exception, v:
                 _log(cid, 'E', 'Error: %s' % v)
                 raise

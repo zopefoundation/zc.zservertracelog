@@ -195,6 +195,7 @@ Here is an example application that adds a custom entry to the tracelog.
     >>> def noisy_app(environ, start_response):
     ...     logger = environ['zc.zservertracelog.interfaces.ITraceLog']
     ...     logger.log('beep! beep!')
+    ...     return ''
     >>> faux_app.app_hook = noisy_app
 
     >>> invokeRequest(req1)
@@ -256,6 +257,7 @@ times, does some database activity and redoes requests due to conflicts.
     ...     conn.update('', 7, 4)
     ...     conn.update('y', 3, 0)
     ...     zc.zservertracelog.tracelog.request_ended(conn)
+    ...     return ''
 
     >>> faux_app.app_hook = dbapp1
 
@@ -289,6 +291,7 @@ Since not all requests necessarily have a ZODB connection in their annotations
     ...     zc.zservertracelog.tracelog.before_traverse(req)
     ...     zc.zservertracelog.tracelog.before_traverse(req)
     ...     zc.zservertracelog.tracelog.request_ended(req)
+    ...     return ''
 
     >>> faux_app.app_hook = dbapp2
 
@@ -299,3 +302,35 @@ Since not all requests necessarily have a ZODB connection in their annotations
     A 146419788 2012-01-10 03:10:05.502579 200 ?
     E 146419788 2012-01-10 03:10:05.502782
 
+
+Headers
+=======
+
+The WSGI environment provided by zservertracelog contains all headers required
+as specified in the WSGI specification.
+
+    >>> def header_app(environ, start_response):
+    ...     logger = environ['zc.zservertracelog.interfaces.ITraceLog']
+    ...     logger.log("wsgi.version: " + str(environ['wsgi.version']))
+    ...     logger.log("wsgi.url_scheme: " + environ['wsgi.url_scheme'])
+    ...     logger.log("wsgi.errors: " + str(environ['wsgi.errors']))
+    ...     logger.log("wsgi.multithread: " + str(environ['wsgi.multithread']))
+    ...     logger.log(
+    ...         "wsgi.multiprocess: " + str(environ['wsgi.multiprocess']))
+    ...     logger.log("wsgi.run_once: " + str(environ['wsgi.run_once']))
+    ...     logger.log("wsgi.input: " + str(environ['wsgi.input']))
+    ...     return ''
+    >>> faux_app.app_hook = header_app
+    >>> invokeRequest(req1)
+    B 23418928 2008-08-26 10:55:00.000000 GET /test-req1
+    I 23418928 2008-08-26 10:55:00.000000 0
+    C 23418928 2008-08-26 10:55:00.000000
+    - 23418928 2008-08-26 10:55:00.000000 wsgi.version: (1, 0)
+    - 23418928 2008-08-26 10:55:00.000000 wsgi.url_scheme: http
+    - 23418928 2008-08-26 10:55:00.000000 wsgi.errors: <open file '<stderr>', mode 'w' at 0x...>
+    - 23418928 2008-08-26 10:55:00.000000 wsgi.multithread: True
+    - 23418928 2008-08-26 10:55:00.000000 wsgi.multiprocess: True
+    - 23418928 2008-08-26 10:55:00.000000 wsgi.run_once: False
+    - 23418928 2008-08-26 10:55:00.000000 wsgi.input: <cStringIO.StringI object at 0x...>
+    A 23418928 2008-08-26 10:55:00.000000 200 ?
+    E 23418928 2008-08-26 10:55:00.000000

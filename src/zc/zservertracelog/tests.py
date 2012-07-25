@@ -34,7 +34,7 @@ checker = zope.testing.renormalizing.RENormalizing([
     (re.compile(r'options:'), 'Options:'),
     ])
 
-_null_app = lambda environ, start_response: None
+_null_app = lambda environ, start_response: ""
 
 
 class FauxApplication(object):
