@@ -1,0 +1,34 @@
+===========================
+ Compliance with WSGI Spec
+===========================
+
+The Server class provided by this (zc.zservertracelog) package complies with
+the WSGI protocol.
+
+    >>> import wsgiref.validate
+    >>> import zc.zservertracelog.tracelog
+
+    >>> faux_app = FauxApplication()
+    >>> faux_app.app_hook = lambda environ, start_response: []
+    >>> validator_app = wsgiref.validate.validator(faux_app)
+
+    >>> addr, port = '127.0.0.1', 12346
+    >>> trace_server = zc.zservertracelog.tracelog.Server(
+    ...     validator_app, None, addr, port)
+
+    >>> def invokeRequest(req):
+    ...     channel = trace_server.channel_class(trace_server, None, addr)
+    ...     channel.received(req)
+
+Process a simple request.
+
+    >>> req1 = """\
+    ... GET /test-req1 HTTP/1.1
+    ... Host: www.example.com
+    ...
+    ... """
+
+The next step will raise AssertionErrors if the server doesn't comply with the
+WSGI spec.
+
+    >>> invokeRequest(req1)

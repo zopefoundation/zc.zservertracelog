@@ -195,6 +195,7 @@ Here is an example application that adds a custom entry to the tracelog.
     >>> def noisy_app(environ, start_response):
     ...     logger = environ['zc.zservertracelog.interfaces.ITraceLog']
     ...     logger.log('beep! beep!')
+    ...     return ["beep! beep!"]
     >>> faux_app.app_hook = noisy_app
 
     >>> invokeRequest(req1)
@@ -256,6 +257,7 @@ times, does some database activity and redoes requests due to conflicts.
     ...     conn.update('', 7, 4)
     ...     conn.update('y', 3, 0)
     ...     zc.zservertracelog.tracelog.request_ended(conn)
+    ...     return []
 
     >>> faux_app.app_hook = dbapp1
 
@@ -289,6 +291,7 @@ Since not all requests necessarily have a ZODB connection in their annotations
     ...     zc.zservertracelog.tracelog.before_traverse(req)
     ...     zc.zservertracelog.tracelog.before_traverse(req)
     ...     zc.zservertracelog.tracelog.request_ended(req)
+    ...     return []
 
     >>> faux_app.app_hook = dbapp2
 
