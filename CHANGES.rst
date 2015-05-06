@@ -1,10 +1,17 @@
 Changes
 =======
 
+1.4.0 (2015-05-06)
+------------------
+
+- tracereport can be limited to a date range with --date=YYYY-MM-DD..YYYY-MM-DD
+
+
 1.3.2 (2012-03-20)
 ------------------
 
 - Slight refactoring to allow alternative tracelog implementations.
+
 
 1.3.1 (2012-03-20)
 ------------------
@@ -19,6 +26,7 @@ Changes
 - Added 'D' records providing database transfer counts.
   This is somewhat experimental. The tracereport script ignores D
   records.
+
 
 1.2.1 (2010-01-27)
 ------------------

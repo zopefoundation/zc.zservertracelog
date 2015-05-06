@@ -15,6 +15,7 @@ The '--help' option displays the following usage information:
     ...     zc.zservertracelog.tracereport.main(['--help'])
     ... except SystemExit:
     ...     pass
+    ... # doctest: +REPORT_NDIFF
     Usage: test [options] trace_log_file
     <BLANKLINE>
     Output trace log data showing:
@@ -43,27 +44,37 @@ The '--help' option displays the following usage information:
     Options:
       -h, --help            show this help message and exit
       -a APPS, --app-request-threshold=APPS
-                             Number of pending application requests at
+                            Number of pending application requests at
                             which detailed request information if
                             printed.
       -r APP_REQUESTS, --app-requests=APP_REQUESTS
-                             How many requests to show when the maximum
+                            How many requests to show when the maximum
                             number of pending apps is exceeded.
       -o OLD_REQUESTS, --old-requests=OLD_REQUESTS
-                             Number of seconds beyond which a request is
+                            Number of seconds beyond which a request is
                             considered old.
       -e EVENT_LOG, --event-log=EVENT_LOG
-                             The name of an event log that goes with the
+                            The name of an event log that goes with the
                             trace log.  This is used to determine when
                             the server is restarted, so that the running
                             trace data structures can be reinitialized.
-      --html                 Generate HTML output.
+      --html                Generate HTML output.
       --remove-prefix=REMOVE_PREFIX
-                             A prefex to be removed from URLS.
-      --summary-only         Only output summary lines.
+                            A prefix to be removed from URLS.
+      --summary-only        Only output summary lines.
       --summary-lines=SUMMARY_LINES
                             The number of summary lines to show
-      -d DATE, --date=DATE  Date range that will be parsed from log
+      -d DATESPEC, --date=DATESPEC
+                            Only consider events in the specified date
+                            range.  Syntax: "YYYY-MM[-DD
+                            [HH[:MM[:SS]]]][ +/-[days=N][, hours=N][,
+                            minutes=N][, seconds=N]]".  E.g. -d 2015-04
+                            would select the entire month, -d 2015-04-20
+                            would select the entire day, -d "2015-04-20
+                            14" would select one hour, -d "2015-04-20
+                            14:00 +hours=2" would select two hours, and
+                            -d "2015-04-20 16:00 -hours=2" would select
+                            the same two hours.
 
 Here, we display the summarized report for a sample trace log.
 

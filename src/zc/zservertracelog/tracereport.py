@@ -601,44 +601,53 @@ show the requests that have been waiting the longest.
 
 parser.add_option("--app-request-threshold", "-a", dest='apps',
                   type="int", default=10,
-                  help="""
+                  help="""\
 Number of pending application requests at which detailed request information
 if printed.
 """)
 parser.add_option("--app-requests", "-r", dest='app_requests',
                   type="int", default=10,
-                  help="""
+                  help="""\
 How many requests to show when the maximum number of pending
 apps is exceeded.
 """)
 parser.add_option("--old-requests", "-o", dest='old_requests',
                   type="int", default=10,
-                  help="""
+                  help="""\
 Number of seconds beyond which a request is considered old.
 """)
 parser.add_option("--event-log", "-e", dest='event_log',
-                  help="""
+                  help="""\
 The name of an event log that goes with the trace log.  This is used
 to determine when the server is restarted, so that the running trace data structures can be reinitialized.
 """)
 parser.add_option("--html", dest='html', action='store_true',
-                  help="""
+                  help="""\
 Generate HTML output.
 """)
 parser.add_option("--remove-prefix", dest='remove_prefix',
-                  help="""
-A prefex to be removed from URLS.
+                  help="""\
+A prefix to be removed from URLS.
 """)
 parser.add_option("--summary-only", dest='summary_only', action='store_true',
-                  help="""
+                  help="""\
 Only output summary lines.
 """)
 parser.add_option("--summary-lines", dest='summary_lines',
                   type="int", default=999999999,
                   help="""The number of summary lines to show""")
 parser.add_option("--date", "-d", dest='date', default=None,
-                  help="""Date range that will be parsed from log""")
+                  metavar='DATESPEC',
+                  help="""\
+Only consider events in the specified date range.  Syntax:
+"YYYY-MM[-DD [HH[:MM[:SS]]]][ +/-[days=N][, hours=N][, minutes=N][,
+seconds=N]]".
 
+E.g. -d 2015-04 would select the entire month, -d 2015-04-20 would
+select the entire day, -d "2015-04-20 14" would select one hour,
+-d "2015-04-20 14:00 +hours=2" would select two hours, and
+-d "2015-04-20 16:00 -hours=2" would select the same two hours.
+""")
 
 
 if __name__ == '__main__':
