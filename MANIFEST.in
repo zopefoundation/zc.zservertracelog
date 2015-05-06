@@ -1,6 +1,7 @@
 include *.py
 include *.rst
 include buildout.cfg
+include tox.ini
 recursive-include src *.log
 recursive-include src *.txt
 recursive-include src *.zcml

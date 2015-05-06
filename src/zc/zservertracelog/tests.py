@@ -32,7 +32,8 @@ checker = zope.testing.renormalizing.RENormalizing([
         '23418928 2008-08-26 10:55:00.000000'),
     (re.compile(r'^usage: '), 'Usage: '),
     (re.compile(r'options:'), 'Options:'),
-    ])
+    (re.compile(r'zope-testrunner'), 'test'),  # sys.argv[0] when run from tox
+])
 
 _null_app = lambda environ, start_response: None
 
