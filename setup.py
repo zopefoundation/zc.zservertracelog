@@ -14,27 +14,21 @@
 import os
 from setuptools import setup, find_packages
 
-name, version = 'zc.zservertracelog', 0
-
-entry_points = """
-[console_scripts]
-tracereport = zc.zservertracelog.tracereport:main
-"""
 
 def read(*rnames):
-    return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
+    with open(os.path.join(os.path.dirname(__file__), *rnames)) as f:
+        return f.read()
 
 
 setup(
-    name=name,
-    version=version,
-    url='http://pypi.python.org/pypi/' + name,
+    name='zc.zservertracelog',
+    version='1.3.3.dev0',
+    url='https://github.com/zopefoundation/zc.zservertracelog',
     author='Zope Corporation and Contributors',
     author_email='zope3-dev@zope.org',
     description='Zope 3 tracelog implementation for zserver',
     long_description=(
         read('README.txt')
-        + '\n\n'
         + '\n\n'
         + read('CHANGES.txt')
     ),
@@ -44,12 +38,12 @@ setup(
     namespace_packages=['zc'],
     package_dir={'': 'src'},
     install_requires=[
-            'setuptools',
-            'zope.app.appsetup',
-            'zope.app.server',
-            'zope.app.wsgi',
-            'zope.server',
-            ],
+        'setuptools',
+        'zope.app.appsetup',
+        'zope.app.server',
+        'zope.app.wsgi',
+        'zope.server',
+    ],
     extras_require=dict(
         test=[
             # Our test suite uses zope.testing.doctest.INTERPRET_FOOTNOTES
@@ -57,8 +51,13 @@ setup(
             # zope.testing.doctest fork of the stdlib's doctest.  The proper
             # way forward would be to switch to Manuel.
             'zope.testing < 4.0.0',
-            ]),
+        ],
+    ),
     include_package_data=True,
     zip_safe=False,
-    entry_points=entry_points,
-    )
+    entry_points=dict(
+        console_scripts=[
+            "tracereport = zc.zservertracelog.tracereport:main",
+        ],
+    ),
+)
