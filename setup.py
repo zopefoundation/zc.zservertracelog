@@ -22,7 +22,7 @@ def read(*rnames):
 
 setup(
     name='zc.zservertracelog',
-    version='1.4.0',
+    version='1.4.1.dev0',
     url='https://github.com/zopefoundation/zc.zservertracelog',
     author='Zope Corporation and Contributors',
     author_email='zope3-dev@zope.org',
