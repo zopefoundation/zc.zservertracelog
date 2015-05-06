@@ -1,5 +1,5 @@
 include *.py
-include *.txt
+include *.rst
 include buildout.cfg
 recursive-include src *.log
 recursive-include src *.txt

@@ -28,9 +28,9 @@ setup(
     author_email='zope3-dev@zope.org',
     description='Zope 3 tracelog implementation for zserver',
     long_description=(
-        read('README.txt')
+        read('README.rst')
         + '\n\n'
-        + read('CHANGES.txt')
+        + read('CHANGES.rst')
     ),
     license='ZPL 2.1',
     keywords='zope3',
