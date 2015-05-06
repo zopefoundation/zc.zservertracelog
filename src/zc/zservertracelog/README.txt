@@ -44,7 +44,7 @@ our own application.
 
 Now, let's create an instance of the tracelog server.
 
-    >>> addr, port = '127.0.0.1', 12345
+    >>> addr, port = '127.0.0.1', 0
 
     >>> trace_server = zc.zservertracelog.tracelog.Server(
     ...     faux_app, None, addr, port)
