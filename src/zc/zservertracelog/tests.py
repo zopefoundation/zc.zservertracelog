@@ -35,7 +35,7 @@ checker = zope.testing.renormalizing.RENormalizing([
     (re.compile(r'zope-testrunner'), 'test'),  # sys.argv[0] when run from tox
 ])
 
-_null_app = lambda environ, start_response: None
+_null_app = lambda environ, start_response: []
 
 
 class FauxApplication(object):
@@ -58,8 +58,8 @@ def analysis_setUp(test):
 
 def test_suite():
     tests = [
-        doctest.DocFileTest(
-            'README.txt',
+        doctest.DocFileSuite(
+            'README.txt', 'wsgi.txt',
             optionflags=(
                 doctest.NORMALIZE_WHITESPACE
                 | doctest.ELLIPSIS

@@ -30,6 +30,7 @@ except ImportError:
 import datetime
 import logging
 import re
+import sys
 import zc.zservertracelog.interfaces
 import zope.app.appsetup.interfaces
 import zope.component
@@ -104,8 +105,11 @@ class Server(wsgihttpserver.WSGIHTTPServer):
         """Overrides HTTPServer.executeRequest()."""
         cid = id(task.channel)
         _log(cid, 'C')
-        env = task.getCGIEnvironment()
-        env['wsgi.input'] = task.request_data.getBodyStream()
+
+        # the method in the Super class adds the necessary environmental
+        # variables needed:
+        # http://legacy.python.org/dev/peps/pep-0333/#environ-variables
+        env = self._constructWSGIEnvironment(task)
         env['zc.zservertracelog.interfaces.ITraceLog'] = TraceLog(cid)
 
         def start_response(status, headers):
@@ -139,12 +143,16 @@ class Server(wsgihttpserver.WSGIHTTPServer):
             _log(cid, 'A', '%s %s' % (getattr(task, 'status', '?'), length))
 
             try:
-                task.write(response)
+                for value in response:
+                    task.write(value)
             except Exception, v:
                 _log(cid, 'E', 'Error: %s' % v)
                 raise
             else:
                 _log(cid, 'E')
+            finally:
+                if hasattr(response, "close"):
+                    response.close()
 
 
 http = servertype.ServerType(
