@@ -19,6 +19,7 @@ import optparse
 import sys
 import os.path
 
+import six
 from zc.zservertracelog.fseek import fseek
 
 
@@ -73,13 +74,13 @@ class Request(object):
 
 class Times(object):
 
-    tid = 1l
+    tid = 1
 
     def __init__(self):
         self.times = []
         self.hangs = 0
         Times.tid += 1
-        self.tid = Times.tid # generate a unique id
+        self.tid = Times.tid  # generate a unique id
 
     def finished(self, request):
         self.times.append(request.app_seconds)
@@ -95,9 +96,9 @@ class Times(object):
         self.times.sort()
         n = len(times)
         if n % 2:
-            m = times[(n+1)/2-1]
+            m = times[(n+1)//2-1]
         else:
-            m = .5 * (times[n/2]+times[n/2-1])
+            m = .5 * (times[n//2]+times[n//2-1])
         self.median = m
         self.mean = float(sum(times))/n
         self.impact = self.mean * (n+self.hangs)
@@ -118,14 +119,14 @@ class Times(object):
         times = self.times
         if not times:
             impact = '<a name="u%s">&nbsp;</a>' % self.tid
-            print td(
-                impact, 0, '&nbsp;', '&nbsp;', '&nbsp;', '&nbsp;', self.hangs)
+            print(td(
+                impact, 0, '&nbsp;', '&nbsp;', '&nbsp;', '&nbsp;', self.hangs))
         else:
-            impact = '<a name="u%s">%s</a>' % (self.tid, self.impact)
+            impact = '<a name="u%s">%.1f</a>' % (self.tid, self.impact)
             n = len(times)
             m = self.median
-            print td(impact, n, times[0], m, self.mean, times[-1],
-                     self.hangs)
+            print(td(impact, n, times[0], m, self.mean, times[-1],
+                     self.hangs))
 
     def __add__(self, other):
         result = Times()
@@ -136,7 +137,7 @@ class Times(object):
 
 def seconds_difference(dt1, dt2):
     delta = dt1 - dt2
-    micros = float('0.' + str(delta.microseconds))
+    micros = float('0.' + str(delta.microseconds))    # XXX: this is Wrong!
     return delta.seconds + micros
 
 
@@ -218,11 +219,16 @@ def time_from_line(line):
 def iterlog(file, date_interval=None):
     size = 0
     if file == '-':
-        file = sys.stdin
+        for record in _iterlog(sys.stdin, size, date_interval):
+            yield record
     else:
         size = os.path.getsize(file)
-        file = open(file)
+        with open(file) as f:
+            for record in _iterlog(f, size, date_interval):
+                yield record
 
+
+def _iterlog(file, size, date_interval=None):
     date_from, date_to = date_interval or (None, None)
     if date_from and size:
         fseek(file, size, date_from, time_from_line)
@@ -262,7 +268,7 @@ def main(args=None):
         output_stats = output_stats_html
         minutes_header = minutes_header_html
         minutes_footer = minutes_footer_html
-        print '<html title="trace log statistics"><body>'
+        print('<html title="trace log statistics"><body>')
     else:
         print_app_requests = print_app_requests_text
         output_minute = output_minute_text
@@ -273,7 +279,6 @@ def main(args=None):
     if options.summary_only:
         print_app_requests = output_minute = lambda *a, **kw: None
         minutes_footer = minutes_header = lambda *a, **kw: None
-
 
     urls = {}
     [file] = args
@@ -380,9 +385,9 @@ def main(args=None):
             input = apps = output = n = wait = 0
             spr = spa = 0.0
         elif typ == 'D':
-            pass # ignore db stats for now
+            pass  # ignore db stats for now
         else:
-            print 'WTF', record
+            print('WTF %s' % (record, ))
 
     record_hung(urls, requests)
     if dt:
@@ -397,120 +402,139 @@ def main(args=None):
     output_stats(urls, lines=options.summary_lines)
 
     if options.html:
-        print '</body></html>'
+        print('</body></html>')
+
 
 def output_stats_text(urls, lines):
-    print
-    print 'URL statistics:'
-    print "   Impact count    min median   mean    max hangs"
-    print "========= ===== ====== ====== ====== ====== ====="
+    print('\nURL statistics:')
+    print("   Impact count    min median   mean    max hangs")
+    print("========= ===== ====== ====== ====== ====== =====")
     urls = [(times.impact(), url, times)
-            for (url, times) in urls.iteritems()
+            for (url, times) in six.iteritems(urls)
             ]
     urls.sort()
     urls.reverse()
     line = 0
     for (_, url, times) in urls:
         if times.impact > 0 or times.hangs:
-            print times, url
+            print("%s %s" % (times, url))
             line += 1
             if line > lines:
                 break
+
 
 def output_stats_html(urls, lines):
-    print
-    print 'URL statistics:'
-    print '<table border="1">'
-    print '<tr><th>Impact</th><th>count</th><th>min</th>'
-    print     '<th>median</th><th>mean</th><th>max</th><th>hangs</th></tr>'
+    print('\nURL statistics:')
+    print('<table border="1">')
+    print('<tr><th>Impact</th><th>count</th><th>min</th>')
+    print('<th>median</th><th>mean</th><th>max</th><th>hangs</th></tr>')
     urls = [(times.impact(), url, times)
-            for (url, times) in urls.iteritems()
+            for (url, times) in six.iteritems(urls)
             ]
     urls.sort()
     urls.reverse()
     line = 0
     for (_, url, times) in urls:
         if times.impact > 0 or times.hangs:
-            if line%2:
-                print '<tr style="background: lightgrey;">'
+            if line % 2:
+                print('<tr style="background: lightgrey;">')
             else:
-                print '<tr>'
+                print('<tr>')
             times.html()
-            print td(url)
-            print '</tr>'
+            print(td(url))
+            print('</tr>')
             line += 1
             if line > lines:
                 break
-    print '</table>'
+    print('</table>')
+
 
 def minutes_header_text():
-    print
-    print "          minute   req input  wait   app output"
-    print "================ ===== ===== ===== ===== ======"
+    print("")
+    print("          minute   req input  wait   app output")
+    print("================ ===== ===== ===== ===== ======")
+
 
 def minutes_footer_text():
-    print
+    print("")
+
 
 def minutes_header_html():
-    print '<table border="2">'
-    print "<tr>"
-    print '<th>Minute</th>'
-    print '<th>Requests</th>'
-    print '<th>Requests inputing</th>'
-    print '<th>Requests waiting</th>'
-    print '<th>Requests executing</th>'
-    print '<th>Requests outputing</th>'
-    print '<th>Requests completed</th>'
-    print '<th>Mean Seconds Per Request Total</th>'
-    print '<th>Mean Seconds Per Request in App</th>'
-    print "</tr>"
+    print('<table border="2">')
+    print("<tr>")
+    print('<th>Minute</th>')
+    print('<th>Requests</th>')
+    print('<th>Requests inputing</th>')
+    print('<th>Requests waiting</th>')
+    print('<th>Requests executing</th>')
+    print('<th>Requests outputing</th>')
+    print('<th>Requests completed</th>')
+    print('<th>Mean Seconds Per Request Total</th>')
+    print('<th>Mean Seconds Per Request in App</th>')
+    print("</tr>")
+
 
 def minutes_footer_html():
-    print '</table>'
+    print('</table>')
+
 
 def output_minute_text(lmin, requests, input, wait, apps, output, n, spr, spa):
-    print lmin, "%5d I=%3d W=%3d A=%3d O=%4d" % (
-        len(requests), input, wait, apps, output),
     if n:
-        print "N=%4d %10.2f %10.2f" % (n, spr/n, spa/n)
+        extra = " N=%4d %10.2f %10.2f" % (n, spr/n, spa/n)
     else:
-        print
+        extra = ""
+    print("%s %5d I=%3d W=%3d A=%3d O=%4d%s"
+          % (lmin, len(requests), input, wait, apps, output, extra))
+
 
 def td(*values):
-    return ''.join([("<td>%s</td>" % s) for s in values])
+    return ''.join(
+        [
+            "<td>%.3f</td>" % s if isinstance(s, float) else
+            "<td>%s</td>" % s
+            for s in values
+        ]
+    )
+
 
 output_minute_count = 0
+
+
 def output_minute_html(lmin, requests, input, wait, apps, output, n, spr, spa):
     global output_minute_count
     output_minute_count += 1
-    if output_minute_count%2:
-        print '<tr style="background: lightgrey">'
+    if output_minute_count % 2:
+        print('<tr style="background: lightgrey">')
     else:
-        print '<tr>'
+        print('<tr>')
     apps = '<font size="+2"><strong>%s</strong></font>' % apps
-    print td(lmin, len(requests), input, wait, apps, output)
+    print(td(lmin, len(requests), input, wait, apps, output))
     if n:
-        print td(n, "%10.2f" % (spr/n), "%10.2f" % (spa/n))
+        print(td(n, "%10.2f" % (spr/n), "%10.2f" % (spa/n)))
     else:
-        print td(n, '&nbsp;', '&nbsp;')
-    print '</tr>'
+        print(td(n, '&nbsp;', '&nbsp;'))
+    print('</tr>')
+
 
 def find_restarts(event_log):
     result = []
-    for l in open(event_log):
-        if l.strip().endswith("Zope Ready to handle requests"):
-            result.append(parsedt(l.split()[0]))
+    with open(event_log) as f:
+        for l in f:
+            if l.strip().endswith("Zope Ready to handle requests"):
+                result.append(parse_datetime(l.split()[0]))
     return result
 
+
 def record_hung(urls, requests):
-    for request in requests.itervalues():
+    for request in six.itervalues(requests):
         times = urls.get(request.url)
         if times is None:
             times = urls[request.url] = Times()
         times.hung()
 
+
 def print_app_requests_text(requests, dt, min_seconds, max_requests, allurls,
-                       label=''):
+                            label=''):
     requests = [
         (seconds_difference(dt, request.start), request)
         for request in requests.values()
@@ -527,14 +551,15 @@ def print_app_requests_text(requests, dt, min_seconds, max_requests, allurls,
         if s < min_seconds:
             continue
         if label:
-            print label
+            print(label)
             label = ''
         url = request.url
         repeat = urls[url]
         if repeat > 1:
-            print s, "R=%d" % repeat, url
+            print("%s R=%d %s" % (s, repeat, url))
         else:
-            print s, url
+            print("%s %s" % (s, url))
+
 
 def print_app_requests_html(requests, dt, min_seconds, max_requests, allurls,
                             label=''):
@@ -555,24 +580,25 @@ def print_app_requests_html(requests, dt, min_seconds, max_requests, allurls,
         if s < min_seconds:
             continue
         if label:
-            print label
+            print(label)
             label = ''
         if not printed:
-            print '</table>'
-            print '<table border="1">'
-            print '<tr><th>age</th><th>R</th><th>url</th><th>state</th></tr>'
+            print('</table>')
+            print('<table border="1">')
+            print('<tr><th>age</th><th>R</th><th>url</th><th>state</th></tr>')
             printed = True
         repeat = urls[url]
-        print '<tr>'
+        print('<tr>')
         if repeat <= 1:
             repeat = ''
         url = '<a href="#u%s">%s</a>' % (allurls[url].tid, url)
-        print td(s, repeat, url, request.state)
-        print '</tr>'
+        print(td(s, repeat, url, request.state))
+        print('</tr>')
 
     if printed:
-        print '</table>'
+        print('</table>')
         minutes_header_html()
+
 
 parser = optparse.OptionParser("""%prog [options] trace_log_file
 

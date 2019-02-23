@@ -57,7 +57,7 @@ Let's also define a convenience function for processing requests.
 
 Process a simple request.
 
-    >>> req1 = """\
+    >>> req1 = b"""\
     ... GET /test-req1 HTTP/1.1
     ... Host: www.example.com
     ...
@@ -150,7 +150,7 @@ Log Messages Containing Line Breaks
 Messages to the tracelog that contain newline characters will not split a log
 entry into multiple lines.
 
-    >>> req2 = """\
+    >>> req2 = b"""\
     ... GET /test-req2/%0Aohnoes/ HTTP/1.1
     ... Host: www.example.com/linebreak
     ...
@@ -169,7 +169,7 @@ Request Query Strings
 
 The tracelog preserves request query strings.
 
-    >>> req3 = """\
+    >>> req3 = b"""\
     ... GET /test-req3/?creature=unicorn HTTP/1.1
     ... Host: www.example.com/query-string
     ...

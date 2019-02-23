@@ -1,12 +1,20 @@
 language: python
-sudo: false
+dist: xenial
 python:
-    - 2.6
     - 2.7
+    - 3.4
+    - 3.5
+    - 3.6
+    - 3.7
+    - pypy2.7-6.0.0
+    - pypy3.5-6.0.0
 install:
-    - python bootstrap.py
-    - bin/buildout
+    - pip install coveralls coverage zope.testrunner
+    - pip install -e .[test]
 script:
     - bin/test -pvc
+    - coverage run -m zope.testrunner --test-path=src -pvc
+after_success:
+    - coveralls
 notifications:
     email: false
