@@ -12,7 +12,6 @@ install:
     - pip install coveralls coverage zope.testrunner
     - pip install -e .[test]
 script:
-    - bin/test -pvc
     - coverage run -m zope.testrunner --test-path=src -pvc
 after_success:
     - coveralls
