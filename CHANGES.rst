@@ -4,6 +4,9 @@ Changes
 2.0.0 (unreleased)
 ------------------
 
+- Fix logic bug in seconds_difference() that could introduce error up to nearly
+  a whole second for any particular event.
+
 - Limit number precision in HTML reports to 3 decimal digits.
 
 - Drop Python 2.6 support.

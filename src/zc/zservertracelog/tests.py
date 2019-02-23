@@ -16,6 +16,7 @@
 """
 __docformat__ = "reStructuredText"
 
+import datetime
 import doctest
 import os
 import re
@@ -26,7 +27,9 @@ import manuel.footnote
 import manuel.testing
 import zope.testing.renormalizing
 
-from zc.zservertracelog.fseek import FSeekTest
+from zc.zservertracelog.fseek import FSeekTest  # noqa
+from zc.zservertracelog.tracereport import seconds_difference
+
 
 here = os.path.dirname(os.path.abspath(__file__))
 
@@ -59,6 +62,14 @@ class FauxApplication(object):
         return app(environ, start_response)
 
 
+class TestHelpers(unittest.TestCase):
+
+    def test_seconds_difference(self):
+        dt1 = datetime.datetime(2019, 2, 23, 14, 5, 54, 451)
+        dt2 = dt1 + datetime.timedelta(minutes=15, seconds=3, microseconds=42)
+        self.assertEqual(seconds_difference(dt2, dt1), 15 * 60 + 3 + 0.000042)
+
+
 def setUp(test):
     test.globs['FauxApplication'] = FauxApplication
 
@@ -79,5 +90,5 @@ def test_suite():
             'tracereport.rst',
             checker=checker,
             setUp=analysis_setUp),
-        unittest.makeSuite(FSeekTest),
+        unittest.defaultTestLoader.loadTestsFromName(__name__),
     ])

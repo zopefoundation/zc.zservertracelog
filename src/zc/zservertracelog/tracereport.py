@@ -137,8 +137,7 @@ class Times(object):
 
 def seconds_difference(dt1, dt2):
     delta = dt1 - dt2
-    micros = float('0.' + str(delta.microseconds))    # XXX: this is Wrong!
-    return delta.seconds + micros
+    return delta.seconds + delta.microseconds * 1e-6
 
 
 def parse_line(line):
