@@ -1,7 +1,7 @@
 Changes
 =======
 
-2.0.0 (unreleased)
+2.0.0 (2019-02-26)
 ------------------
 
 - Fix logic bug in seconds_difference() that could introduce error up to nearly

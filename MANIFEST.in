@@ -5,3 +5,6 @@ include tox.ini
 recursive-include src *.log
 recursive-include src *.rst
 recursive-include src *.zcml
+
+# added by check_manifest.py
+include .coveragerc
