@@ -13,6 +13,15 @@
 ##############################################################################
 """Crude Tracelog Hack for ZServer
 """
+
+import datetime
+import logging
+import re
+
+import zope.app.appsetup.interfaces
+import zope.component
+import zope.server.http.httprequestparser
+import zope.server.http.httpserverchannel
 from zope.app.server import servertype
 from zope.app.wsgi import WSGIPublisherApplication
 from zope.server.http import wsgihttpserver
@@ -26,16 +35,8 @@ except ImportError:
     from zope.app.publication.interfaces import BeforeTraverseEvent
     from zope.app.publication.interfaces import EndRequestEvent
 
-
-import datetime
-import logging
-import re
 import zc.zservertracelog.interfaces
-import zope.app.appsetup.interfaces
-import zope.component
-import zope.app.publication.interfaces
-import zope.server.http.httprequestparser
-import zope.server.http.httpserverchannel
+
 
 tracelog = logging.getLogger('zc.tracelog')
 
@@ -58,8 +59,8 @@ def get(request):
     return request['zc.zservertracelog.interfaces.ITraceLog']
 
 
+@zope.interface.implementer(zc.zservertracelog.interfaces.ITraceLog)
 class TraceLog(object):
-    zope.interface.implements(zc.zservertracelog.interfaces.ITraceLog)
 
     def __init__(self, channel_id):
         self.channel_id = channel_id
@@ -92,7 +93,9 @@ class Channel(zope.server.http.httpserverchannel.HTTPServerChannel):
             self, parser)
 
 
-status_match = re.compile('(\d+) (.*)').match
+status_match = re.compile(r'(\d+) (.*)').match
+
+
 class Server(wsgihttpserver.WSGIHTTPServer):
 
     channel_class = Channel
@@ -122,7 +125,7 @@ class Server(wsgihttpserver.WSGIHTTPServer):
         # Call the application to handle the request and write a response
         try:
             response = self.application(env, start_response)
-        except Exception, v:
+        except Exception as v:
             _log(cid, 'A', 'Error: %s' % v)
             _log(cid, 'E')
             raise
@@ -140,7 +143,7 @@ class Server(wsgihttpserver.WSGIHTTPServer):
 
             try:
                 task.write(response)
-            except Exception, v:
+            except Exception as v:
                 _log(cid, 'E', 'Error: %s' % v)
                 raise
             else:
@@ -165,6 +168,7 @@ pmhttp = servertype.ServerType(
 def started(event):
     tracelog.info('S 0 %s', datetime.datetime.now())
 
+
 @zope.component.adapter(BeforeTraverseEvent)
 def before_traverse(event):
     request = event.request
@@ -179,6 +183,7 @@ def before_traverse(event):
         tl.transfer_counts = dict(
             (name, connection.get_connection(name).getTransferCounts())
             for name in connection.db().databases)
+
 
 @zope.component.adapter(EndRequestEvent)
 def request_ended(event):

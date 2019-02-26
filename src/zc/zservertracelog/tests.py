@@ -16,15 +16,28 @@
 """
 __docformat__ = "reStructuredText"
 
-from zope.testing import doctest
+import datetime
+import doctest
 import os
 import re
 import unittest
+
+import manuel.doctest
+import manuel.footnote
+import manuel.testing
 import zope.testing.renormalizing
 
-from zc.zservertracelog.fseek import FSeekTest
+from zc.zservertracelog.fseek import FSeekTest  # noqa
+from zc.zservertracelog.tracereport import seconds_difference
+
 
 here = os.path.dirname(os.path.abspath(__file__))
+
+optionflags = (
+    doctest.NORMALIZE_WHITESPACE
+    | doctest.ELLIPSIS
+    | doctest.REPORT_ONLY_FIRST_FAILURE
+)
 
 checker = zope.testing.renormalizing.RENormalizing([
     # normalize the channel id and iso8601 timestamp
@@ -32,10 +45,11 @@ checker = zope.testing.renormalizing.RENormalizing([
         '23418928 2008-08-26 10:55:00.000000'),
     (re.compile(r'^usage: '), 'Usage: '),
     (re.compile(r'options:'), 'Options:'),
-    (re.compile(r'zope-testrunner'), 'test'),  # sys.argv[0] when run from tox
 ])
 
-_null_app = lambda environ, start_response: None
+
+def _null_app(environ, start_response):
+    pass
 
 
 class FauxApplication(object):
@@ -48,6 +62,14 @@ class FauxApplication(object):
         return app(environ, start_response)
 
 
+class TestHelpers(unittest.TestCase):
+
+    def test_seconds_difference(self):
+        dt1 = datetime.datetime(2019, 2, 23, 14, 5, 54, 451)
+        dt2 = dt1 + datetime.timedelta(minutes=15, seconds=3, microseconds=42)
+        self.assertEqual(seconds_difference(dt2, dt1), 15 * 60 + 3 + 0.000042)
+
+
 def setUp(test):
     test.globs['FauxApplication'] = FauxApplication
 
@@ -57,21 +79,16 @@ def analysis_setUp(test):
 
 
 def test_suite():
-    tests = [
+    m = manuel.doctest.Manuel(
+        optionflags=optionflags,
+        checker=checker,
+    )
+    m += manuel.footnote.Manuel()
+    return unittest.TestSuite([
+        manuel.testing.TestSuite(m, 'README.rst', setUp=setUp),
         doctest.DocFileTest(
-            'README.txt',
-            optionflags=(
-                doctest.NORMALIZE_WHITESPACE
-                | doctest.ELLIPSIS
-                | doctest.INTERPRET_FOOTNOTES),
-            checker=checker,
-            setUp=setUp,
-            ),
-        doctest.DocFileTest(
-            'tracereport.txt',
+            'tracereport.rst',
             checker=checker,
             setUp=analysis_setUp),
-        unittest.makeSuite(FSeekTest),
-    ]
-
-    return unittest.TestSuite(tests)
+        unittest.defaultTestLoader.loadTestsFromName(__name__),
+    ])
