@@ -1,7 +1,0 @@
-[run]
-source = zc.zservertracelog
-
-[report]
-exclude_lines =
-    pragma: nocover
-    if __name__ == .__main__.:
