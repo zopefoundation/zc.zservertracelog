@@ -45,7 +45,7 @@ class Request(object):
         self.start = start
         self.state = 'input'
 
-    def I(self, input_time, input_bytes):
+    def I(self, input_time, input_bytes):  # noqa: E743 E741
         self.input_time = input_time
         self.input_bytes = input_bytes
         self.state = 'wait'
@@ -518,9 +518,9 @@ def output_minute_html(lmin, requests, input, wait, apps, output, n, spr, spa):
 def find_restarts(event_log):
     result = []
     with open(event_log) as f:
-        for l in f:
-            if l.strip().endswith("Zope Ready to handle requests"):
-                result.append(parse_datetime(l.split()[0]))
+        for line in f:
+            if line.strip().endswith("Zope Ready to handle requests"):
+                result.append(parse_datetime(line.split()[0]))
     return result
 
 
@@ -644,7 +644,8 @@ Number of seconds beyond which a request is considered old.
 parser.add_option("--event-log", "-e", dest='event_log',
                   help="""\
 The name of an event log that goes with the trace log.  This is used
-to determine when the server is restarted, so that the running trace data structures can be reinitialized.
+to determine when the server is restarted, so that the running trace data
+structures can be reinitialized.
 """)
 parser.add_option("--html", dest='html', action='store_true',
                   help="""\
