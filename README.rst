@@ -2,8 +2,8 @@
 Zope 3/ZServer tracelog
 =======================
 
-.. image:: https://travis-ci.com/zopefoundation/zc.zservertracelog.svg?branch=master
-    :target: https://travis-ci.com/zopefoundation/zc.zservertracelog
+.. image:: https://github.com/zopefoundation/zc.zservertracelog/actions/workflows/tests.yml/badge.svg
+    :target: https://github.com/zopefoundation/zc.zservertracelog/actions/workflows/tests.yml
 
 This package implements a Zope2-style (extended) tracelog.  A tracelog
 is a kind of access log that records several low-level events for each
