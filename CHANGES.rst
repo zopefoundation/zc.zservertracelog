@@ -4,7 +4,7 @@ Changes
 2.1 (unreleased)
 ----------------
 
-- Add support for Python 3.8 and 3.9.
+- Add support for Python 3.8, 3.9, 3.10.
 
 - Drop support for Python 3.4.
 

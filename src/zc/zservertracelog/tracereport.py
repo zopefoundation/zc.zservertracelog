@@ -16,10 +16,11 @@
 """
 import datetime
 import optparse
-import sys
 import os.path
+import sys
 
 import six
+
 from zc.zservertracelog.fseek import fseek
 
 
