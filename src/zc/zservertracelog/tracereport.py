@@ -19,8 +19,6 @@ import optparse
 import os.path
 import sys
 
-import six
-
 from zc.zservertracelog.fseek import fseek
 
 
@@ -36,7 +34,7 @@ DATE_FORMATS = (
 OFFSET_VALID_KEYS = ('days', 'minutes', 'seconds')
 
 
-class Request(object):
+class Request:
 
     output_bytes = '-'
 
@@ -73,7 +71,7 @@ class Request(object):
         return seconds_difference(self.end, self.start)
 
 
-class Times(object):
+class Times:
 
     tid = 1
 
@@ -123,7 +121,7 @@ class Times(object):
             print(td(
                 impact, 0, '&nbsp;', '&nbsp;', '&nbsp;', '&nbsp;', self.hangs))
         else:
-            impact = '<a name="u%s">%.1f</a>' % (self.tid, self.impact)
+            impact = '<a name="u{}">{:.1f}</a>'.format(self.tid, self.impact)
             n = len(times)
             m = self.median
             print(td(impact, n, times[0], m, self.mean, times[-1],
@@ -219,13 +217,11 @@ def time_from_line(line):
 def iterlog(file, date_interval=None):
     size = 0
     if file == '-':
-        for record in _iterlog(sys.stdin, size, date_interval):
-            yield record
+        yield from _iterlog(sys.stdin, size, date_interval)
     else:
         size = os.path.getsize(file)
         with open(file) as f:
-            for record in _iterlog(f, size, date_interval):
-                yield record
+            yield from _iterlog(f, size, date_interval)
 
 
 def _iterlog(file, size, date_interval=None):
@@ -387,7 +383,7 @@ def main(args=None):
         elif typ == 'D':
             pass  # ignore db stats for now
         else:
-            print('WTF %s' % (record, ))
+            print('WTF {}'.format(record))
 
     record_hung(urls, requests)
     if dt:
@@ -410,14 +406,14 @@ def output_stats_text(urls, lines):
     print("   Impact count    min median   mean    max hangs")
     print("========= ===== ====== ====== ====== ====== =====")
     urls = [(times.impact(), url, times)
-            for (url, times) in six.iteritems(urls)
+            for (url, times) in urls.items()
             ]
     urls.sort()
     urls.reverse()
     line = 0
     for (_, url, times) in urls:
         if times.impact > 0 or times.hangs:
-            print("%s %s" % (times, url))
+            print("{} {}".format(times, url))
             line += 1
             if line > lines:
                 break
@@ -429,7 +425,7 @@ def output_stats_html(urls, lines):
     print('<tr><th>Impact</th><th>count</th><th>min</th>')
     print('<th>median</th><th>mean</th><th>max</th><th>hangs</th></tr>')
     urls = [(times.impact(), url, times)
-            for (url, times) in six.iteritems(urls)
+            for (url, times) in urls.items()
             ]
     urls.sort()
     urls.reverse()
@@ -526,7 +522,7 @@ def find_restarts(event_log):
 
 
 def record_hung(urls, requests):
-    for request in six.itervalues(requests):
+    for request in requests.values():
         times = urls.get(request.url)
         if times is None:
             times = urls[request.url] = Times()
@@ -558,7 +554,7 @@ def print_app_requests_text(requests, dt, min_seconds, max_requests, allurls,
         if repeat > 1:
             print("%s R=%d %s" % (s, repeat, url))
         else:
-            print("%s %s" % (s, url))
+            print("{} {}".format(s, url))
 
 
 def print_app_requests_html(requests, dt, min_seconds, max_requests, allurls,
@@ -591,7 +587,7 @@ def print_app_requests_html(requests, dt, min_seconds, max_requests, allurls,
         print('<tr>')
         if repeat <= 1:
             repeat = ''
-        url = '<a href="#u%s">%s</a>' % (allurls[url].tid, url)
+        url = '<a href="#u{}">{}</a>'.format(allurls[url].tid, url)
         print(td(s, repeat, url, request.state))
         print('</tr>')
 

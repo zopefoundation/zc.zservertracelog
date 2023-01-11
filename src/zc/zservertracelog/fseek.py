@@ -1,6 +1,5 @@
 import unittest
-
-from six.moves import cStringIO as StringIO
+from io import StringIO
 
 
 def strip(s):

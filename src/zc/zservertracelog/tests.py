@@ -52,7 +52,7 @@ def _null_app(environ, start_response):
     pass
 
 
-class FauxApplication(object):
+class FauxApplication:
     """Fake WSGI application.  Doesn't need to do much!"""
 
     app_hook = None

@@ -50,7 +50,6 @@ setup(
     package_dir={'': 'src'},
     install_requires=[
         'setuptools',
-        'six',
         'zope.app.appsetup',
         'zope.app.server',
         'zope.app.wsgi',
