@@ -24,17 +24,10 @@ import zope.server.http.httprequestparser
 import zope.server.http.httpserverchannel
 from zope.app.server import servertype
 from zope.app.wsgi import WSGIPublisherApplication
+from zope.publisher.interfaces import EndRequestEvent
 from zope.server.http import wsgihttpserver
 from zope.server.http.commonaccesslogger import CommonAccessLogger
-
-
-# Gaaaa, these have moved:
-try:
-    from zope.publisher.interfaces import BeforeTraverseEvent
-    from zope.publisher.interfaces import EndRequestEvent
-except ImportError:
-    from zope.app.publication.interfaces import BeforeTraverseEvent
-    from zope.app.publication.interfaces import EndRequestEvent
+from zope.traversing.interfaces import BeforeTraverseEvent
 
 import zc.zservertracelog.interfaces
 
@@ -46,7 +39,7 @@ def _log(channel_id, trace_code='-', msg=None, timestamp=None):
     if timestamp is None:
         timestamp = datetime.datetime.now()
 
-    entry = '%s %s %s' % (trace_code, channel_id, timestamp)
+    entry = '{} {} {}'.format(trace_code, channel_id, timestamp)
 
     if msg:
         entry += ' %s' % repr(msg)[1:-1]
@@ -61,7 +54,7 @@ def get(request):
 
 
 @zope.interface.implementer(zc.zservertracelog.interfaces.ITraceLog)
-class TraceLog(object):
+class TraceLog:
 
     def __init__(self, channel_id):
         self.channel_id = channel_id
@@ -87,7 +80,7 @@ class Channel(zope.server.http.httpserverchannel.HTTPServerChannel):
             full_path += '?%s' % parser.query
 
         cid = id(self)
-        _log(cid, 'B', '%s %s' % (parser.command, full_path), parser.__B)
+        _log(cid, 'B', '{} {}'.format(parser.command, full_path), parser.__B)
         _log(cid, 'I', str(parser.content_length))
 
         zope.server.http.httpserverchannel.HTTPServerChannel.handle_request(
@@ -102,7 +95,7 @@ class Server(wsgihttpserver.WSGIHTTPServer):
     channel_class = Channel
 
     def __init__(self, *args, **kwargs):
-        super(Server, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def executeRequest(self, task):
         """Overrides HTTPServer.executeRequest()."""
@@ -140,7 +133,8 @@ class Server(wsgihttpserver.WSGIHTTPServer):
             else:
                 length = '?'
 
-            _log(cid, 'A', '%s %s' % (getattr(task, 'status', '?'), length))
+            _log(cid, 'A', '{} {}'.format(
+                getattr(task, 'status', '?'), length))
 
             try:
                 task.write(response)
@@ -181,9 +175,9 @@ def before_traverse(event):
         # Not all requests have a ZODB connection; consider /++etc++process
         if connection is None:
             return
-        tl.transfer_counts = dict(
-            (name, connection.get_connection(name).getTransferCounts())
-            for name in connection.db().databases)
+        tl.transfer_counts = {
+            name: connection.get_connection(name).getTransferCounts()
+            for name in connection.db().databases}
 
 
 @zope.component.adapter(EndRequestEvent)

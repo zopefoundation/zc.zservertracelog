@@ -24,7 +24,7 @@ def read(*rnames):
 
 setup(
     name='zc.zservertracelog',
-    version='2.1.dev0',
+    version='3.0.dev0',
     url='https://github.com/zopefoundation/zc.zservertracelog',
     author='Zope Corporation and Contributors',
     author_email='zope3-dev@zope.org',
@@ -37,13 +37,11 @@ setup(
     license='ZPL 2.1',
     keywords='zope3',
     classifiers=[
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
@@ -52,7 +50,6 @@ setup(
     package_dir={'': 'src'},
     install_requires=[
         'setuptools',
-        'six',
         'zope.app.appsetup',
         'zope.app.server',
         'zope.app.wsgi',
