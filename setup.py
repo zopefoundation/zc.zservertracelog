@@ -37,6 +37,7 @@ setup(
     license='ZPL 2.1',
     keywords='zope3',
     classifiers=[
+        'Development Status :: 4 - Beta',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
@@ -48,6 +49,7 @@ setup(
     packages=find_packages('src'),
     namespace_packages=['zc'],
     package_dir={'': 'src'},
+    python_requires='>=3.7',
     install_requires=[
         'setuptools',
         'zope.app.appsetup',
